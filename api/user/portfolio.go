@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -22,37 +21,37 @@ func New(transport transport.Transport) UserAPI {
 	}
 }
 
-// GetPortfolio retrieves the portfolio collections for a given wallet address
-func (u *userAPI) GetPortfolio(ctx context.Context, req *PortfolioRequest) (*PortfolioResponse, error) {
+// GetPortfolio retrieves portfolio data for a given wallet address
+// Returns: response body, status code, error
+func (u *userAPI) GetPortfolio(ctx context.Context, req *PortfolioRequest) ([]byte, int, error) {
 	// Validate the request
 	if err := req.Validate(); err != nil {
-		return nil, fmt.Errorf("request validation failed: %w", err)
+		return nil, 0, fmt.Errorf("request validation failed: %w", err)
 	}
 
 	// Build query parameters from the request
 	params, err := utils.BuildQueryParams(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build query parameters: %w", err)
+		return nil, 0, fmt.Errorf("failed to build query parameters: %w", err)
 	}
 
 	// Make the HTTP request
 	resp, err := u.transport.Get(ctx, "/api/v1/user/portfolio", params)
 	if err != nil {
-		return nil, fmt.Errorf("HTTP request failed: %w", err)
+		return nil, 0, fmt.Errorf("HTTP request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+		return nil, resp.StatusCode, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	// Parse the JSON response
-	var portfolioResp PortfolioResponse
-	if err := json.Unmarshal(body, &portfolioResp); err != nil {
-		return nil, fmt.Errorf("failed to parse JSON response: %w", err)
+	// Check for HTTP errors
+	if resp.StatusCode >= 400 {
+		return body, resp.StatusCode, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
-	return &portfolioResp, nil
+	return body, resp.StatusCode, nil
 }
