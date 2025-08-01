@@ -17,6 +17,14 @@ type ListingsRequest struct {
 	Currencies []string `json:"currencies,omitempty"`
 }
 
+// TSwapsPoolsRequest represents the request parameters for getting user TSwap pools
+type TSwapsPoolsRequest struct {
+	Owner         string   `json:"owner"`
+	PoolAddresses []string `json:"poolAddresses"`
+	Limit         int32    `json:"limit"`
+	Cursor        *string  `json:"cursor,omitempty"`
+}
+
 // NFTBidsRequest represents the request parameters for getting user NFT bids
 type NFTBidsRequest struct {
 	Owner        string   `json:"owner"`
@@ -233,6 +241,29 @@ func (r *TraitBidsRequest) Validate() error {
 	for _, bidAddr := range r.BidAddresses {
 		if err := validateSolanaAddress(bidAddr); err != nil {
 			return fmt.Errorf("invalid bid address %s: %w", bidAddr, err)
+		}
+	}
+
+	return nil
+}
+
+func (r *TSwapsPoolsRequest) Validate() error {
+	if r.Owner == "" {
+		return fmt.Errorf("owner wallet address is required")
+	}
+
+	if err := validateSolanaAddress(r.Owner); err != nil {
+		return fmt.Errorf("invalid owner wallet address: %w", err)
+	}
+
+	if r.Limit <= 0 || r.Limit > 500 {
+		return fmt.Errorf("limit must be between 1 and 500")
+	}
+
+	// Validate pool addresses if provided
+	for _, poolAddr := range r.PoolAddresses {
+		if err := validateSolanaAddress(poolAddr); err != nil {
+			return fmt.Errorf("invalid pool address %s: %w", poolAddr, err)
 		}
 	}
 

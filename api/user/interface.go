@@ -23,4 +23,8 @@ type UserAPI interface {
 	// GetTraitBids retrieves all trait bids made by a supplied wallet
 	// Returns: response body, status code, error
 	GetTraitBids(ctx context.Context, req *TraitBidsRequest) ([]byte, int, error)
+
+	//GetTSwapPools Retrieves TSwap pools owned by an address.
+	//Returns: response body, status code, error
+	GetTSwapPools(ctx context.Context, req *TSwapsPoolsRequest) ([]byte, int, error)
 }
