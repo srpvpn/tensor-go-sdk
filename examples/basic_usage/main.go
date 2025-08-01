@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Example 1: Basic usage with default configuration
-	fmt.Println("=== Tensor SDK Basic Usage Example ===\n")
+	fmt.Println("=== Tensor SDK Basic Usage Example ===")
 
 	// Create a client with default configuration
 	// This will use the default base URL and timeout
@@ -64,7 +64,7 @@ func main() {
 	}
 
 	// Example 3: Advanced usage with custom configuration and options
-	fmt.Println("=== Advanced Usage Example ===\n")
+	fmt.Println("=== Advanced Usage Example ===")
 
 	// Create client with custom configuration
 	config := &client.Config{
@@ -105,7 +105,7 @@ func main() {
 	fmt.Printf("Found %d collections with detailed information\n\n", len(advancedResponse.Collections))
 
 	// Example 4: Error handling scenarios
-	fmt.Println("=== Error Handling Examples ===\n")
+	fmt.Println("=== Error Handling Examples ===")
 
 	// Example with invalid wallet address
 	fmt.Println("Testing with invalid wallet address...")
