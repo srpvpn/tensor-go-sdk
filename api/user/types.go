@@ -7,6 +7,16 @@ import (
 	"strings"
 )
 
+// ListingsRequest represents the request parameters for getting user listings
+type ListingsRequest struct {
+	Wallets    []string `json:"wallets"`
+	SortBy     string   `json:"sortBy"`
+	Limit      int32    `json:"limit"`
+	Cursor     *string  `json:"cursor,omitempty"`
+	CollId     *string  `json:"collId,omitempty"`
+	Currencies []string `json:"currencies,omitempty"`
+}
+
 // PortfolioRequest represents the request parameters for getting user portfolio
 type PortfolioRequest struct {
 	Wallet                string   `json:"wallet"`

@@ -7,4 +7,8 @@ type UserAPI interface {
 	// GetPortfolio retrieves portfolio data for a given wallet address
 	// Returns: response body, status code, error
 	GetPortfolio(ctx context.Context, req *PortfolioRequest) ([]byte, int, error)
+
+	// GetListings retrieves all active listings for a supplied wallet
+	// Returns: response body, status code, error
+	GetListings(ctx context.Context, req *ListingsRequest) ([]byte, int, error)
 }
