@@ -19,4 +19,8 @@ type UserAPI interface {
 	// GetCollectionBids retrieves all collection bids made by a supplied wallet
 	// Returns: response body, status code, error
 	GetCollectionBids(ctx context.Context, req *CollectionBidsRequest) ([]byte, int, error)
+
+	// GetTraitBids retrieves all trait bids made by a supplied wallet
+	// Returns: response body, status code, error
+	GetTraitBids(ctx context.Context, req *TraitBidsRequest) ([]byte, int, error)
 }

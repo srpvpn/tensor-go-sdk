@@ -152,6 +152,73 @@ func main() {
 		fmt.Println("✓ Full collection bids request processed successfully")
 	}
 
+	// Test 5: Trait Bids endpoint
+	fmt.Println("\n=== Testing Trait Bids Endpoint ===")
+
+	// Test 5.1: Valid trait bids request
+	fmt.Println("Test 5.1: Valid Trait Bids request")
+	validTraitRequest := &user.TraitBidsRequest{
+		Owner: "11111111111111111111111111111112", // Valid test wallet
+		Limit: 15,
+	}
+
+	body, status, err = tensorClient.User.GetTraitBids(ctx, validTraitRequest)
+	if err != nil {
+		fmt.Printf("Expected error (no API key): %v\n", err)
+	} else {
+		fmt.Printf("Success! Status: %d, Body: %s\n", status, string(body))
+	}
+
+	// Test 5.2: Trait bids validation errors
+	fmt.Println("\nTest 5.2: Trait Bids validation errors")
+
+	// Empty owner
+	invalidTraitRequest1 := &user.TraitBidsRequest{
+		Owner: "",
+		Limit: 10,
+	}
+	_, _, err = tensorClient.User.GetTraitBids(ctx, invalidTraitRequest1)
+	if err != nil {
+		fmt.Printf("✓ Empty owner validation: %v\n", err)
+	}
+
+	// Invalid limit
+	invalidTraitRequest2 := &user.TraitBidsRequest{
+		Owner: "11111111111111111111111111111112",
+		Limit: 501, // Too high
+	}
+	_, _, err = tensorClient.User.GetTraitBids(ctx, invalidTraitRequest2)
+	if err != nil {
+		fmt.Printf("✓ Invalid limit validation: %v\n", err)
+	}
+
+	// Invalid owner address
+	invalidTraitRequest3 := &user.TraitBidsRequest{
+		Owner: "invalid-address",
+		Limit: 10,
+	}
+	_, _, err = tensorClient.User.GetTraitBids(ctx, invalidTraitRequest3)
+	if err != nil {
+		fmt.Printf("✓ Invalid owner address validation: %v\n", err)
+	}
+
+	// Test 5.3: Full trait bids request with all optional parameters
+	fmt.Println("\nTest 5.3: Full trait bids request with optional parameters")
+	fullTraitRequest := &user.TraitBidsRequest{
+		Owner:        "11111111111111111111111111111112",
+		Limit:        25,
+		CollId:       stringPtr("some-collection-id"),
+		Cursor:       stringPtr("some-cursor"),
+		BidAddresses: []string{"11111111111111111111111111111113"},
+	}
+
+	_, _, err = tensorClient.User.GetTraitBids(ctx, fullTraitRequest)
+	if err != nil {
+		fmt.Printf("Expected error (no API key): %v\n", err)
+	} else {
+		fmt.Println("✓ Full trait bids request processed successfully")
+	}
+
 	fmt.Println("\n=== All tests completed! ===")
 }
 
