@@ -1,0 +1,50 @@
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of go run
+*.log
+
+# Dependency directories (Go modules)
+vendor/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+./kiro/
+.kiro/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Coverage files
+coverage.out
+
+# Mock/generated code 
+**/mocks/
+**/mock_*.go
+stringer_generated.go
+
+# GitHub Actions artifacts
+*.tgz
+
+# Docs
+docs/dist/
+docs/.vitepress/cache/
+node_modules/
+
+# Binaries or local CLI tools
+bin/
+

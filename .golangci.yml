@@ -1,0 +1,23 @@
+run:
+  timeout: 2m
+version: "2"
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - staticcheck
+    - unused
+    - gocritic
+    - godot
+    - gofmt
+    - revive
+    - gosec
+    - depguard
+
+linters-settings:
+  depguard:
+    rules:
+      main:
+        allow:
+          - $gostd
+          - github.com/srpvpn/tensor-go-sdk
