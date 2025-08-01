@@ -61,15 +61,14 @@ func (r *PortfolioRequest) Validate() error {
 }
 
 // validateSolanaAddress validates that the provided string is a valid Solana address
+var solanaAddressRegex = regexp.MustCompile(`^[1-9A-HJ-NP-Za-km-z]+$`)
+
 func validateSolanaAddress(address string) error {
-	// Solana addresses are base58 encoded and typically 32-44 characters long
 	if len(address) < 32 || len(address) > 44 {
 		return fmt.Errorf("address length must be between 32 and 44 characters")
 	}
 
-	// Check for valid base58 characters (no 0, O, I, l)
-	validBase58 := regexp.MustCompile(`^[1-9A-HJ-NP-Za-km-z]+$`)
-	if !validBase58.MatchString(address) {
+	if !solanaAddressRegex.MatchString(address) {
 		return fmt.Errorf("address contains invalid characters")
 	}
 
