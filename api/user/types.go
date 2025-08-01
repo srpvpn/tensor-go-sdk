@@ -100,3 +100,42 @@ func (r *PortfolioRequest) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+// Validate validates the ListingsRequest fields
+func (r *ListingsRequest) Validate() error {
+	if len(r.Wallets) == 0 {
+		return fmt.Errorf("at least one wallet address is required")
+	}
+
+	for _, wallet := range r.Wallets {
+		if err := validateSolanaAddress(wallet); err != nil {
+			return fmt.Errorf("invalid wallet address %s: %w", wallet, err)
+		}
+	}
+
+	if r.Limit <= 0 {
+		return fmt.Errorf("limit must be greater than 0")
+	}
+
+	validSortOptions := []string{
+		"PriceDesc", "NormalizedPriceAsc", "NormalizedPriceDesc", "HybridAmountAsc",
+		"HybridAmountDesc", "LastSaleAsc", "LastSaleDesc", "ListedDesc", "RankHrttAsc",
+		"RankHrttDesc", "RankStatAsc", "OrdinalAsc", "RankStatDesc", "OrdinalDesc",
+		"RankTeamAsc", "RankTeamDesc", "RankTnAsc", "RankTnDesc", "PriceAsc",
+	}
+
+	if r.SortBy != "" {
+		isValid := false
+		for _, validOption := range validSortOptions {
+			if r.SortBy == validOption {
+				isValid = true
+				break
+			}
+		}
+		if !isValid {
+			return fmt.Errorf("invalid sortBy value: %s", r.SortBy)
+		}
+	}
+
+	return nil
+}

@@ -8,13 +8,13 @@ import (
 	"github.com/srpvpn/tensor-go-sdk/internal/utils"
 )
 
-// GetPortfolio retrieves portfolio data for a given wallet address
+// GetListings retrieves all active listings for supplied wallets
 // Returns: response body, status code, error
 func (u *userAPI) GetListings(ctx context.Context, req *ListingsRequest) ([]byte, int, error) {
 	// Validate the request
-	// if err := req.Validate(); err != nil {
-	// 	return nil, 0, fmt.Errorf("request validation failed: %w", err)
-	// }
+	if err := req.Validate(); err != nil {
+		return nil, 0, fmt.Errorf("request validation failed: %w", err)
+	}
 
 	// Build query parameters from the request
 	params, err := utils.BuildQueryParams(req)
