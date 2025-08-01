@@ -15,13 +15,17 @@ func main() {
 	// Example 1: Basic usage with default configuration
 	fmt.Println("=== Tensor SDK Basic Usage Example ===")
 
-	// Create a client with default configuration
-	// This will use the default base URL and timeout
-	tensorClient := client.New(nil)
+	// Create a client configuration
+	cfg := client.Config{
+		APIKey: os.Getenv("TENSOR_API_KEY"),
+	}
+
+	// Create a client with the configuration
+	tensorClient := client.New(&cfg)
 	defer tensorClient.Close()
 
 	// Example wallet address (this is a well-known Solana address for demonstration)
-	walletAddress := "DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy"
+	walletAddress := "EXAMPLE"
 
 	// Example 2: Basic portfolio request
 	fmt.Printf("Fetching portfolio for wallet: %s\n", walletAddress)
@@ -35,33 +39,15 @@ func main() {
 	}
 
 	// Execute the request
-	response, err := tensorClient.User.GetPortfolio(ctx, request)
+	responseBody, statusCode, err := tensorClient.User.GetPortfolio(ctx, request)
 	if err != nil {
 		handleError("Failed to get portfolio", err)
 		return
 	}
 
 	// Display basic results
-	fmt.Printf("✓ Request successful: %s\n", response.Message)
-	fmt.Printf("Found %d collections in portfolio\n\n", len(response.Collections))
-
-	// Display collection details
-	if len(response.Collections) > 0 {
-		fmt.Println("=== Portfolio Collections ===")
-		for i, collection := range response.Collections {
-			fmt.Printf("%d. %s (%s)\n", i+1, collection.Name, collection.Symbol)
-			fmt.Printf("   Floor Price: %.4f SOL\n", collection.FloorPrice)
-			fmt.Printf("   24h Volume: %.4f SOL\n", collection.Volume24h)
-			fmt.Printf("   Verified: %t\n", collection.Verified)
-			if collection.BidCount != nil {
-				fmt.Printf("   Bid Count: %d\n", *collection.BidCount)
-			}
-			if collection.FavCount != nil {
-				fmt.Printf("   Favorite Count: %d\n", *collection.FavCount)
-			}
-			fmt.Println()
-		}
-	}
+	fmt.Printf("✓ Request successful (status: %d)\n", statusCode)
+	fmt.Printf("Raw response: %s\n\n", string(responseBody))
 
 	// Example 3: Advanced usage with custom configuration and options
 	fmt.Println("=== Advanced Usage Example ===")
@@ -70,7 +56,6 @@ func main() {
 	config := &client.Config{
 		BaseURL: "https://api.mainnet.tensordev.io",
 		Timeout: 45 * time.Second,
-		// APIKey: "your-api-key-here", // Uncomment if you have an API key
 	}
 
 	advancedClient := client.New(config)
@@ -95,14 +80,14 @@ func main() {
 	fmt.Println("Options: Include bid count, favorite count, compressed collections")
 
 	// Execute the advanced request
-	advancedResponse, err := advancedClient.User.GetPortfolio(ctx, advancedRequest)
+	advancedBody, advancedStatus, err := advancedClient.User.GetPortfolio(ctx, advancedRequest)
 	if err != nil {
 		handleError("Failed to get advanced portfolio", err)
 		return
 	}
 
-	fmt.Printf("✓ Advanced request successful: %s\n", advancedResponse.Message)
-	fmt.Printf("Found %d collections with detailed information\n\n", len(advancedResponse.Collections))
+	fmt.Printf("✓ Advanced request successful (status: %d)\n", advancedStatus)
+	fmt.Printf("Advanced response: %s\n\n", string(advancedBody))
 
 	// Example 4: Error handling scenarios
 	fmt.Println("=== Error Handling Examples ===")
@@ -113,7 +98,7 @@ func main() {
 		Wallet: "invalid-wallet-address",
 	}
 
-	_, err = tensorClient.User.GetPortfolio(ctx, invalidRequest)
+	_, _, err = tensorClient.User.GetPortfolio(ctx, invalidRequest)
 	if err != nil {
 		fmt.Printf("✓ Expected error caught: %v\n", err)
 	}
@@ -124,7 +109,7 @@ func main() {
 		Wallet: "",
 	}
 
-	_, err = tensorClient.User.GetPortfolio(ctx, emptyRequest)
+	_, _, err = tensorClient.User.GetPortfolio(ctx, emptyRequest)
 	if err != nil {
 		fmt.Printf("✓ Expected validation error caught: %v\n", err)
 	}
@@ -136,7 +121,7 @@ func main() {
 	shortCtx, shortCancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer shortCancel()
 
-	_, err = tensorClient.User.GetPortfolio(shortCtx, request)
+	_, _, err = tensorClient.User.GetPortfolio(shortCtx, request)
 	if err != nil {
 		fmt.Printf("✓ Context timeout handled: %v\n", err)
 	}
