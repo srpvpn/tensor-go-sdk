@@ -58,25 +58,22 @@ func TestNew(t *testing.T) {
 }
 
 func TestUserAPI_GetPortfolio_Success(t *testing.T) {
-	// Prepare mock response
-	mockResp := PortfolioResponse{
-		Message: "success",
-		Collections: []Collection{
-			{
-				ID:         "collection1",
-				Name:       "Test Collection",
-				Symbol:     "TEST",
-				Image:      "https://example.com/image.png",
-				FloorPrice: 1.5,
-				Volume24h:  100.0,
-				Verified:   true,
-				Compressed: false,
-			},
+	// Prepare mock response - just a simple array of collections
+	mockCollections := []Collection{
+		{
+			ID:         "collection1",
+			Name:       "Test Collection",
+			Symbol:     "TEST",
+			Image:      "https://example.com/image.png",
+			FloorPrice: 1.5,
+			Volume24h:  100.0,
+			Verified:   true,
+			Compressed: false,
 		},
 	}
 
 	transport := &mockTransport{
-		response: createMockResponse(200, mockResp),
+		response: createMockResponse(200, mockCollections),
 	}
 
 	api := New(transport)
@@ -85,11 +82,16 @@ func TestUserAPI_GetPortfolio_Success(t *testing.T) {
 		Wallet: "11111111111111111111111111111112", // Valid test wallet
 	}
 
-	result, err := api.GetPortfolio(context.Background(), req)
+	body, statusCode, err := api.GetPortfolio(context.Background(), req)
 
 	// Verify no error occurred
 	if err != nil {
 		t.Fatalf("GetPortfolio() returned error: %v", err)
+	}
+
+	// Verify status code
+	if statusCode != 200 {
+		t.Errorf("Expected status code 200, got %d", statusCode)
 	}
 
 	// Verify the correct path was called
@@ -102,28 +104,26 @@ func TestUserAPI_GetPortfolio_Success(t *testing.T) {
 		t.Errorf("Expected wallet parameter '%s', got '%s'", req.Wallet, transport.lastParams.Get("wallet"))
 	}
 
-	// Verify response was parsed correctly
-	if result.Message != mockResp.Message {
-		t.Errorf("Expected message '%s', got '%s'", mockResp.Message, result.Message)
+	// Verify response body is valid JSON
+	var collections []Collection
+	if err := json.Unmarshal(body, &collections); err != nil {
+		t.Fatalf("Failed to parse response body: %v", err)
 	}
 
-	if len(result.Collections) != 1 {
-		t.Errorf("Expected 1 collection, got %d", len(result.Collections))
+	if len(collections) != 1 {
+		t.Errorf("Expected 1 collection, got %d", len(collections))
 	}
 
-	if result.Collections[0].ID != "collection1" {
-		t.Errorf("Expected collection ID 'collection1', got '%s'", result.Collections[0].ID)
+	if collections[0].ID != "collection1" {
+		t.Errorf("Expected collection ID 'collection1', got '%s'", collections[0].ID)
 	}
 }
 
 func TestUserAPI_GetPortfolio_WithOptionalParams(t *testing.T) {
-	mockResp := PortfolioResponse{
-		Message:     "success",
-		Collections: []Collection{},
-	}
+	mockCollections := []Collection{}
 
 	transport := &mockTransport{
-		response: createMockResponse(200, mockResp),
+		response: createMockResponse(200, mockCollections),
 	}
 
 	api := New(transport)
@@ -143,7 +143,7 @@ func TestUserAPI_GetPortfolio_WithOptionalParams(t *testing.T) {
 		Currencies:            []string{"SOL", "USDC"},
 	}
 
-	_, err := api.GetPortfolio(context.Background(), req)
+	_, _, err := api.GetPortfolio(context.Background(), req)
 
 	if err != nil {
 		t.Fatalf("GetPortfolio() returned error: %v", err)
@@ -182,7 +182,7 @@ func TestUserAPI_GetPortfolio_ValidationError(t *testing.T) {
 		Wallet: "",
 	}
 
-	_, err := api.GetPortfolio(context.Background(), req)
+	_, _, err := api.GetPortfolio(context.Background(), req)
 
 	if err == nil {
 		t.Fatal("Expected validation error for empty wallet")
@@ -202,7 +202,7 @@ func TestUserAPI_GetPortfolio_InvalidWallet(t *testing.T) {
 		Wallet: "invalid-wallet",
 	}
 
-	_, err := api.GetPortfolio(context.Background(), req)
+	_, _, err := api.GetPortfolio(context.Background(), req)
 
 	if err == nil {
 		t.Fatal("Expected validation error for invalid wallet")
@@ -227,7 +227,7 @@ func TestUserAPI_GetPortfolio_TransportError(t *testing.T) {
 		Wallet: "11111111111111111111111111111112",
 	}
 
-	_, err := api.GetPortfolio(context.Background(), req)
+	_, _, err := api.GetPortfolio(context.Background(), req)
 
 	if err == nil {
 		t.Fatal("Expected transport error")
@@ -253,7 +253,7 @@ func TestUserAPI_GetPortfolio_APIError(t *testing.T) {
 		Wallet: "11111111111111111111111111111112",
 	}
 
-	_, err := api.GetPortfolio(context.Background(), req)
+	_, _, err := api.GetPortfolio(context.Background(), req)
 
 	if err == nil {
 		t.Fatal("Expected API error")
@@ -281,20 +281,27 @@ func TestUserAPI_GetPortfolio_InvalidJSON(t *testing.T) {
 		Wallet: "11111111111111111111111111111112",
 	}
 
-	_, err := api.GetPortfolio(context.Background(), req)
+	body, statusCode, err := api.GetPortfolio(context.Background(), req)
 
-	if err == nil {
-		t.Fatal("Expected JSON parsing error")
+	// With raw response, there should be no error - we just return the raw data
+	if err != nil {
+		t.Fatalf("GetPortfolio() returned unexpected error: %v", err)
 	}
 
-	if !strings.Contains(fmt.Sprintf("%v", err), "failed to parse JSON response") {
-		t.Errorf("Expected JSON parsing error, got: %v", err)
+	// Verify status code
+	if statusCode != 200 {
+		t.Errorf("Expected status code 200, got %d", statusCode)
+	}
+
+	// Verify we get the raw invalid JSON back
+	if string(body) != "invalid json" {
+		t.Errorf("Expected raw body 'invalid json', got '%s'", string(body))
 	}
 }
 
 func TestUserAPI_GetPortfolio_ContextCancellation(t *testing.T) {
 	transport := &mockTransport{
-		response: createMockResponse(200, PortfolioResponse{Message: "success"}),
+		response: createMockResponse(200, []Collection{}),
 	}
 
 	api := New(transport)
@@ -309,7 +316,7 @@ func TestUserAPI_GetPortfolio_ContextCancellation(t *testing.T) {
 
 	// The transport mock doesn't actually respect context cancellation,
 	// but we can verify the context is passed through
-	_, err := api.GetPortfolio(ctx, req)
+	_, _, err := api.GetPortfolio(ctx, req)
 
 	// In a real scenario with cancelled context, we'd expect an error
 	// For this mock test, we just verify the method completes

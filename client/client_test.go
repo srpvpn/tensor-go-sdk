@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -147,35 +148,25 @@ func TestClient_IntegrationFlow(t *testing.T) {
 		Wallet: "11111111111111111111111111111111", // Valid 32-character wallet address
 	}
 
-	resp, err := client.User.GetPortfolio(ctx, req)
+	body, statusCode, err := client.User.GetPortfolio(ctx, req)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
 
-	// Verify response
-	if resp == nil {
-		t.Fatal("expected response to be non-nil")
+	// Verify status code
+	if statusCode != 200 {
+		t.Errorf("expected status code 200, got %d", statusCode)
 	}
 
-	if resp.Message != "success" {
-		t.Errorf("expected message 'success', got '%s'", resp.Message)
+	// Verify response body is not empty
+	if len(body) == 0 {
+		t.Fatal("expected response body to be non-empty")
 	}
 
-	if len(resp.Collections) != 1 {
-		t.Errorf("expected 1 collection, got %d", len(resp.Collections))
-	}
-
-	collection := resp.Collections[0]
-	if collection.ID != "test-collection-1" {
-		t.Errorf("expected collection ID 'test-collection-1', got '%s'", collection.ID)
-	}
-
-	if collection.Name != "Test Collection" {
-		t.Errorf("expected collection name 'Test Collection', got '%s'", collection.Name)
-	}
-
-	if collection.FloorPrice != 1.5 {
-		t.Errorf("expected floor price 1.5, got %f", collection.FloorPrice)
+	// For simplicity, just check that the response contains key elements
+	bodyStr := string(body)
+	if !strings.Contains(bodyStr, "test-collection-1") {
+		t.Errorf("expected response to contain 'test-collection-1', got: %s", bodyStr)
 	}
 }
 func TestClient_IntegrationFlow_WithAPIKey(t *testing.T) {
@@ -211,7 +202,7 @@ func TestClient_IntegrationFlow_WithAPIKey(t *testing.T) {
 		Wallet: "11111111111111111111111111111111", // Valid 32-character wallet address
 	}
 
-	_, err := client.User.GetPortfolio(ctx, req)
+	_, _, err := client.User.GetPortfolio(ctx, req)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -243,7 +234,7 @@ func TestClient_IntegrationFlow_ErrorHandling(t *testing.T) {
 		Wallet: "invalid-wallet",
 	}
 
-	_, err := client.User.GetPortfolio(ctx, req)
+	_, _, err := client.User.GetPortfolio(ctx, req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -278,7 +269,7 @@ func TestClient_IntegrationFlow_ContextCancellation(t *testing.T) {
 		Wallet: "11111111111111111111111111111111", // Valid 32-character wallet address
 	}
 
-	_, err := client.User.GetPortfolio(ctx, req)
+	_, _, err := client.User.GetPortfolio(ctx, req)
 	if err == nil {
 		t.Fatal("expected context timeout error, got nil")
 	}
