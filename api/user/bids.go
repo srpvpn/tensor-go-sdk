@@ -42,3 +42,38 @@ func (u *userAPI) GetNFTBids(ctx context.Context, req *NFTBidsRequest) ([]byte, 
 
 	return body, resp.StatusCode, nil
 }
+
+// GetCollectionBids retrieves all collection bids made by a supplied wallet
+// Returns: response body, status code, error
+func (u *userAPI) GetCollectionBids(ctx context.Context, req *CollectionBidsRequest) ([]byte, int, error) {
+	// Validate the request
+	if err := req.Validate(); err != nil {
+		return nil, 0, fmt.Errorf("request validation failed: %w", err)
+	}
+
+	// Build query parameters from the request
+	params, err := utils.BuildQueryParams(req)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to build query parameters: %w", err)
+	}
+
+	// Make the HTTP request
+	resp, err := u.transport.Get(ctx, "/api/v1/user/coll_bids", params)
+	if err != nil {
+		return nil, 0, fmt.Errorf("HTTP request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, resp.StatusCode, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Check for HTTP errors
+	if resp.StatusCode >= 400 {
+		return body, resp.StatusCode, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	return body, resp.StatusCode, nil
+}

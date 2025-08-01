@@ -85,6 +85,73 @@ func main() {
 		fmt.Println("✓ Full request processed successfully")
 	}
 
+	// Test 4: Collection Bids endpoint
+	fmt.Println("\n=== Testing Collection Bids Endpoint ===")
+
+	// Test 4.1: Valid collection bids request
+	fmt.Println("Test 4.1: Valid Collection Bids request")
+	validCollRequest := &user.CollectionBidsRequest{
+		Owner: "11111111111111111111111111111112", // Valid test wallet
+		Limit: 20,
+	}
+
+	body, status, err = tensorClient.User.GetCollectionBids(ctx, validCollRequest)
+	if err != nil {
+		fmt.Printf("Expected error (no API key): %v\n", err)
+	} else {
+		fmt.Printf("Success! Status: %d, Body: %s\n", status, string(body))
+	}
+
+	// Test 4.2: Collection bids validation errors
+	fmt.Println("\nTest 4.2: Collection Bids validation errors")
+
+	// Empty owner
+	invalidCollRequest1 := &user.CollectionBidsRequest{
+		Owner: "",
+		Limit: 10,
+	}
+	_, _, err = tensorClient.User.GetCollectionBids(ctx, invalidCollRequest1)
+	if err != nil {
+		fmt.Printf("✓ Empty owner validation: %v\n", err)
+	}
+
+	// Invalid limit
+	invalidCollRequest2 := &user.CollectionBidsRequest{
+		Owner: "11111111111111111111111111111112",
+		Limit: 501, // Too high
+	}
+	_, _, err = tensorClient.User.GetCollectionBids(ctx, invalidCollRequest2)
+	if err != nil {
+		fmt.Printf("✓ Invalid limit validation: %v\n", err)
+	}
+
+	// Invalid owner address
+	invalidCollRequest3 := &user.CollectionBidsRequest{
+		Owner: "invalid-address",
+		Limit: 10,
+	}
+	_, _, err = tensorClient.User.GetCollectionBids(ctx, invalidCollRequest3)
+	if err != nil {
+		fmt.Printf("✓ Invalid owner address validation: %v\n", err)
+	}
+
+	// Test 4.3: Full collection bids request with all optional parameters
+	fmt.Println("\nTest 4.3: Full collection bids request with optional parameters")
+	fullCollRequest := &user.CollectionBidsRequest{
+		Owner:        "11111111111111111111111111111112",
+		Limit:        30,
+		CollId:       stringPtr("some-collection-id"),
+		Cursor:       stringPtr("some-cursor"),
+		BidAddresses: []string{"11111111111111111111111111111113"},
+	}
+
+	_, _, err = tensorClient.User.GetCollectionBids(ctx, fullCollRequest)
+	if err != nil {
+		fmt.Printf("Expected error (no API key): %v\n", err)
+	} else {
+		fmt.Println("✓ Full collection bids request processed successfully")
+	}
+
 	fmt.Println("\n=== All tests completed! ===")
 }
 

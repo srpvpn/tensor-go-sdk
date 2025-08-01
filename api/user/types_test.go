@@ -553,3 +553,189 @@ func equalStringPtr(a, b *string) bool {
 	}
 	return *a == *b
 }
+
+func TestCollectionBidsRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *CollectionBidsRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &CollectionBidsRequest{
+				Owner: "11111111111111111111111111111112",
+				Limit: 100,
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty owner",
+			request: &CollectionBidsRequest{
+				Owner: "",
+				Limit: 100,
+			},
+			wantErr: true,
+			errMsg:  "owner wallet address is required",
+		},
+		{
+			name: "invalid owner - too short",
+			request: &CollectionBidsRequest{
+				Owner: "short",
+				Limit: 100,
+			},
+			wantErr: true,
+			errMsg:  "invalid owner wallet address",
+		},
+		{
+			name: "invalid owner - invalid characters",
+			request: &CollectionBidsRequest{
+				Owner: "1111111111111111111111111111111O", // Contains 'O'
+				Limit: 100,
+			},
+			wantErr: true,
+			errMsg:  "invalid owner wallet address",
+		},
+		{
+			name: "limit too low",
+			request: &CollectionBidsRequest{
+				Owner: "11111111111111111111111111111112",
+				Limit: 0,
+			},
+			wantErr: true,
+			errMsg:  "limit must be between 1 and 500",
+		},
+		{
+			name: "limit too high",
+			request: &CollectionBidsRequest{
+				Owner: "11111111111111111111111111111112",
+				Limit: 501,
+			},
+			wantErr: true,
+			errMsg:  "limit must be between 1 and 500",
+		},
+		{
+			name: "valid request with optional fields",
+			request: &CollectionBidsRequest{
+				Owner:        "11111111111111111111111111111112",
+				Limit:        50,
+				CollId:       stringPtr("collection123"),
+				Cursor:       stringPtr("cursor123"),
+				BidAddresses: []string{"11111111111111111111111111111113", "11111111111111111111111111111114"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid bid address",
+			request: &CollectionBidsRequest{
+				Owner:        "11111111111111111111111111111112",
+				Limit:        50,
+				BidAddresses: []string{"invalid_address"},
+			},
+			wantErr: true,
+			errMsg:  "invalid bid address",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("CollectionBidsRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && err.Error() != tt.errMsg && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("CollectionBidsRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("CollectionBidsRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestCollectionBidsRequest_JSON(t *testing.T) {
+	tests := []struct {
+		name     string
+		request  *CollectionBidsRequest
+		expected string
+	}{
+		{
+			name: "minimal request",
+			request: &CollectionBidsRequest{
+				Owner: "11111111111111111111111111111112",
+				Limit: 100,
+			},
+			expected: `{"owner":"11111111111111111111111111111112","limit":100}`,
+		},
+		{
+			name: "full request",
+			request: &CollectionBidsRequest{
+				Owner:        "11111111111111111111111111111112",
+				Limit:        50,
+				CollId:       stringPtr("collection123"),
+				Cursor:       stringPtr("cursor123"),
+				BidAddresses: []string{"11111111111111111111111111111113", "11111111111111111111111111111114"},
+			},
+			expected: `{"owner":"11111111111111111111111111111112","limit":50,"collId":"collection123","cursor":"cursor123","bidAddresses":["11111111111111111111111111111113","11111111111111111111111111111114"]}`,
+		},
+		{
+			name: "request with nil optional fields",
+			request: &CollectionBidsRequest{
+				Owner:        "11111111111111111111111111111112",
+				Limit:        100,
+				CollId:       nil,
+				Cursor:       nil,
+				BidAddresses: nil,
+			},
+			expected: `{"owner":"11111111111111111111111111111112","limit":100}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Test marshaling
+			data, err := json.Marshal(tt.request)
+			if err != nil {
+				t.Errorf("json.Marshal() error = %v", err)
+				return
+			}
+
+			if string(data) != tt.expected {
+				t.Errorf("json.Marshal() = %v, want %v", string(data), tt.expected)
+			}
+
+			// Test unmarshaling
+			var unmarshaled CollectionBidsRequest
+			err = json.Unmarshal(data, &unmarshaled)
+			if err != nil {
+				t.Errorf("json.Unmarshal() error = %v", err)
+				return
+			}
+
+			// Compare fields
+			if unmarshaled.Owner != tt.request.Owner {
+				t.Errorf("Unmarshaled Owner = %v, want %v", unmarshaled.Owner, tt.request.Owner)
+			}
+
+			if unmarshaled.Limit != tt.request.Limit {
+				t.Errorf("Unmarshaled Limit = %v, want %v", unmarshaled.Limit, tt.request.Limit)
+			}
+
+			if !equalStringPtr(unmarshaled.CollId, tt.request.CollId) {
+				t.Errorf("Unmarshaled CollId = %v, want %v", unmarshaled.CollId, tt.request.CollId)
+			}
+
+			if !equalStringPtr(unmarshaled.Cursor, tt.request.Cursor) {
+				t.Errorf("Unmarshaled Cursor = %v, want %v", unmarshaled.Cursor, tt.request.Cursor)
+			}
+
+			if !equalStringSlice(unmarshaled.BidAddresses, tt.request.BidAddresses) {
+				t.Errorf("Unmarshaled BidAddresses = %v, want %v", unmarshaled.BidAddresses, tt.request.BidAddresses)
+			}
+		})
+	}
+}

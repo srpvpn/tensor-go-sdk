@@ -15,4 +15,8 @@ type UserAPI interface {
 	// GetNFTBids retrieves all single NFT bids made by a supplied wallet
 	// Returns: response body, status code, error
 	GetNFTBids(ctx context.Context, req *NFTBidsRequest) ([]byte, int, error)
+
+	// GetCollectionBids retrieves all collection bids made by a supplied wallet
+	// Returns: response body, status code, error
+	GetCollectionBids(ctx context.Context, req *CollectionBidsRequest) ([]byte, int, error)
 }
