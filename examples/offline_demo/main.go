@@ -11,7 +11,7 @@ import (
 
 func main() {
 	fmt.Println("=== Tensor SDK Offline Demo ===")
-	fmt.Println("This demo shows SDK usage patterns without making real API calls\n")
+	fmt.Println("This demo shows SDK usage patterns without making real API calls")
 
 	// Example 1: Client creation and configuration
 	fmt.Println("1. Creating SDK client with custom configuration...")
@@ -156,32 +156,29 @@ func main() {
 
 	// This would be how you handle different types of errors in real usage:
 	fmt.Println("In real usage, you would handle errors like this:")
-	fmt.Println(`
+	codeExample := `
 	response, err := tensorClient.User.GetPortfolio(ctx, request)
 	if err != nil {
-		// Handle different error types
 		switch {
 		case strings.Contains(err.Error(), "validation"):
-			log.Printf("Validation error: %v", err)
-			// Handle validation errors
+			log.Printf("Validation error: %%v", err)
 		case strings.Contains(err.Error(), "timeout"):
-			log.Printf("Request timeout: %v", err)
-			// Handle timeout errors
+			log.Printf("Request timeout: %%v", err)
 		case strings.Contains(err.Error(), "403"):
-			log.Printf("Authentication error: %v", err)
-			// Handle auth errors
+			log.Printf("Authentication error: %%v", err)
 		default:
-			log.Printf("Unknown error: %v", err)
-			// Handle other errors
+			log.Printf("Unknown error: %%v", err)
 		}
 		return
 	}
-	
-	// Process successful response
+
 	for _, collection := range response.Collections {
-		fmt.Printf("Collection: %s, Floor: %.2f SOL\n", 
+		fmt.Printf("Collection: %%s, Floor: %%.2f SOL\n", 
 			collection.Name, collection.FloorPrice)
-	}`)
+	}
+`
+fmt.Println(codeExample)
+
 
 	fmt.Println("\n=== Demo completed successfully! ===")
 	fmt.Println("\nTo run with real API calls, use the basic_usage example:")
