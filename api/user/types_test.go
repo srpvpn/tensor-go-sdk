@@ -352,3 +352,204 @@ func findInString(s, substr string) bool {
 	}
 	return false
 }
+
+func TestNFTBidsRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *NFTBidsRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &NFTBidsRequest{
+				Owner: "11111111111111111111111111111112",
+				Limit: 100,
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty owner",
+			request: &NFTBidsRequest{
+				Owner: "",
+				Limit: 100,
+			},
+			wantErr: true,
+			errMsg:  "owner wallet address is required",
+		},
+		{
+			name: "invalid owner - too short",
+			request: &NFTBidsRequest{
+				Owner: "short",
+				Limit: 100,
+			},
+			wantErr: true,
+			errMsg:  "invalid owner wallet address",
+		},
+		{
+			name: "invalid owner - invalid characters",
+			request: &NFTBidsRequest{
+				Owner: "1111111111111111111111111111111O", // Contains 'O'
+				Limit: 100,
+			},
+			wantErr: true,
+			errMsg:  "invalid owner wallet address",
+		},
+		{
+			name: "limit too low",
+			request: &NFTBidsRequest{
+				Owner: "11111111111111111111111111111112",
+				Limit: 0,
+			},
+			wantErr: true,
+			errMsg:  "limit must be between 1 and 500",
+		},
+		{
+			name: "limit too high",
+			request: &NFTBidsRequest{
+				Owner: "11111111111111111111111111111112",
+				Limit: 501,
+			},
+			wantErr: true,
+			errMsg:  "limit must be between 1 and 500",
+		},
+		{
+			name: "valid request with optional fields",
+			request: &NFTBidsRequest{
+				Owner:        "11111111111111111111111111111112",
+				Limit:        50,
+				CollId:       stringPtr("collection123"),
+				Cursor:       stringPtr("cursor123"),
+				BidAddresses: []string{"11111111111111111111111111111113", "11111111111111111111111111111114"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid bid address",
+			request: &NFTBidsRequest{
+				Owner:        "11111111111111111111111111111112",
+				Limit:        50,
+				BidAddresses: []string{"invalid_address"},
+			},
+			wantErr: true,
+			errMsg:  "invalid bid address",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("NFTBidsRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && err.Error() != tt.errMsg && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("NFTBidsRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("NFTBidsRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestNFTBidsRequest_JSON(t *testing.T) {
+	tests := []struct {
+		name     string
+		request  *NFTBidsRequest
+		expected string
+	}{
+		{
+			name: "minimal request",
+			request: &NFTBidsRequest{
+				Owner: "11111111111111111111111111111112",
+				Limit: 100,
+			},
+			expected: `{"owner":"11111111111111111111111111111112","limit":100}`,
+		},
+		{
+			name: "full request",
+			request: &NFTBidsRequest{
+				Owner:        "11111111111111111111111111111112",
+				Limit:        50,
+				CollId:       stringPtr("collection123"),
+				Cursor:       stringPtr("cursor123"),
+				BidAddresses: []string{"11111111111111111111111111111113", "11111111111111111111111111111114"},
+			},
+			expected: `{"owner":"11111111111111111111111111111112","limit":50,"collId":"collection123","cursor":"cursor123","bidAddresses":["11111111111111111111111111111113","11111111111111111111111111111114"]}`,
+		},
+		{
+			name: "request with nil optional fields",
+			request: &NFTBidsRequest{
+				Owner:        "11111111111111111111111111111112",
+				Limit:        100,
+				CollId:       nil,
+				Cursor:       nil,
+				BidAddresses: nil,
+			},
+			expected: `{"owner":"11111111111111111111111111111112","limit":100}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Test marshaling
+			data, err := json.Marshal(tt.request)
+			if err != nil {
+				t.Errorf("json.Marshal() error = %v", err)
+				return
+			}
+
+			if string(data) != tt.expected {
+				t.Errorf("json.Marshal() = %v, want %v", string(data), tt.expected)
+			}
+
+			// Test unmarshaling
+			var unmarshaled NFTBidsRequest
+			err = json.Unmarshal(data, &unmarshaled)
+			if err != nil {
+				t.Errorf("json.Unmarshal() error = %v", err)
+				return
+			}
+
+			// Compare fields
+			if unmarshaled.Owner != tt.request.Owner {
+				t.Errorf("Unmarshaled Owner = %v, want %v", unmarshaled.Owner, tt.request.Owner)
+			}
+
+			if unmarshaled.Limit != tt.request.Limit {
+				t.Errorf("Unmarshaled Limit = %v, want %v", unmarshaled.Limit, tt.request.Limit)
+			}
+
+			if !equalStringPtr(unmarshaled.CollId, tt.request.CollId) {
+				t.Errorf("Unmarshaled CollId = %v, want %v", unmarshaled.CollId, tt.request.CollId)
+			}
+
+			if !equalStringPtr(unmarshaled.Cursor, tt.request.Cursor) {
+				t.Errorf("Unmarshaled Cursor = %v, want %v", unmarshaled.Cursor, tt.request.Cursor)
+			}
+
+			if !equalStringSlice(unmarshaled.BidAddresses, tt.request.BidAddresses) {
+				t.Errorf("Unmarshaled BidAddresses = %v, want %v", unmarshaled.BidAddresses, tt.request.BidAddresses)
+			}
+		})
+	}
+}
+
+// Helper function for string pointer comparison
+func stringPtr(s string) *string {
+	return &s
+}
+
+func equalStringPtr(a, b *string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
+}

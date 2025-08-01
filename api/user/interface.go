@@ -11,4 +11,8 @@ type UserAPI interface {
 	// GetListings retrieves all active listings for a supplied wallet
 	// Returns: response body, status code, error
 	GetListings(ctx context.Context, req *ListingsRequest) ([]byte, int, error)
+
+	// GetNFTBids retrieves all single NFT bids made by a supplied wallet
+	// Returns: response body, status code, error
+	GetNFTBids(ctx context.Context, req *NFTBidsRequest) ([]byte, int, error)
 }

@@ -17,6 +17,15 @@ type ListingsRequest struct {
 	Currencies []string `json:"currencies,omitempty"`
 }
 
+// NFTBidsRequest represents the request parameters for getting user NFT bids
+type NFTBidsRequest struct {
+	Owner        string   `json:"owner"`
+	Limit        int32    `json:"limit"`
+	CollId       *string  `json:"collId,omitempty"`
+	Cursor       *string  `json:"cursor,omitempty"`
+	BidAddresses []string `json:"bidAddresses,omitempty"`
+}
+
 // PortfolioRequest represents the request parameters for getting user portfolio
 type PortfolioRequest struct {
 	Wallet                string   `json:"wallet"`
@@ -134,6 +143,30 @@ func (r *ListingsRequest) Validate() error {
 		}
 		if !isValid {
 			return fmt.Errorf("invalid sortBy value: %s", r.SortBy)
+		}
+	}
+
+	return nil
+}
+
+// Validate validates the NFTBidsRequest fields
+func (r *NFTBidsRequest) Validate() error {
+	if r.Owner == "" {
+		return fmt.Errorf("owner wallet address is required")
+	}
+
+	if err := validateSolanaAddress(r.Owner); err != nil {
+		return fmt.Errorf("invalid owner wallet address: %w", err)
+	}
+
+	if r.Limit <= 0 || r.Limit > 500 {
+		return fmt.Errorf("limit must be between 1 and 500")
+	}
+
+	// Validate bid addresses if provided
+	for _, bidAddr := range r.BidAddresses {
+		if err := validateSolanaAddress(bidAddr); err != nil {
+			return fmt.Errorf("invalid bid address %s: %w", bidAddr, err)
 		}
 	}
 
