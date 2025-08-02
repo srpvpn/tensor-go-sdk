@@ -24,6 +24,15 @@ func New(transport transport.Transport) UserAPI {
 // GetPortfolio retrieves portfolio data for a given wallet address
 // Returns: response body, status code, error
 func (u *userAPI) GetPortfolio(ctx context.Context, req *PortfolioRequest) ([]byte, int, error) {
+	return u.executeRequest(ctx, "/api/v1/user/portfolio", req)
+}
+
+// executeRequest is a helper method that handles the common pattern of:
+// 1. Request validation
+// 2. Query parameter building
+// 3. HTTP request execution
+// 4. Response handling
+func (u *userAPI) executeRequest(ctx context.Context, endpoint string, req Validator) ([]byte, int, error) {
 	// Validate the request
 	if err := req.Validate(); err != nil {
 		return nil, 0, fmt.Errorf("request validation failed: %w", err)
@@ -36,7 +45,7 @@ func (u *userAPI) GetPortfolio(ctx context.Context, req *PortfolioRequest) ([]by
 	}
 
 	// Make the HTTP request
-	resp, err := u.transport.Get(ctx, "/api/v1/user/portfolio", params)
+	resp, err := u.transport.Get(ctx, endpoint, params)
 	if err != nil {
 		return nil, 0, fmt.Errorf("HTTP request failed: %w", err)
 	}

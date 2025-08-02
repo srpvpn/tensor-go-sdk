@@ -2,6 +2,11 @@ package user
 
 import "context"
 
+// Validator defines the interface for request validation
+type Validator interface {
+	Validate() error
+}
+
 // UserAPI defines the interface for user-related API operations
 type UserAPI interface {
 	// GetPortfolio retrieves portfolio data for a given wallet address
