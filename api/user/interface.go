@@ -24,7 +24,15 @@ type UserAPI interface {
 	// Returns: response body, status code, error
 	GetTraitBids(ctx context.Context, req *TraitBidsRequest) ([]byte, int, error)
 
-	//GetTSwapPools Retrieves TSwap pools owned by an address.
+	//GetTSwapPools retrieves TSwap pools owned by an address.
 	//Returns: response body, status code, error
 	GetTSwapPools(ctx context.Context, req *TSwapsPoolsRequest) ([]byte, int, error)
+
+	//GetTAmmPools retrieves TAmm pools owned by an address.
+	//Returns: response body, status code, error
+	GetTAmmPools(ctx context.Context, req *TAmmPoolsRequest) ([]byte, int, error)
+
+	// GetTransactions retrieves all NFT transactions for a supplied wallet.
+	// Returns: response body, status code, error
+	GetTransactions(ctx context.Context, req *TransactionsRequest) ([]byte, int, error)
 }
