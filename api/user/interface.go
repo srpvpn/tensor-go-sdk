@@ -40,4 +40,13 @@ type UserAPI interface {
 	// GetTransactions retrieves all NFT transactions for a supplied wallet.
 	// Returns: response body, status code, error
 	GetTransactions(ctx context.Context, req *TransactionsRequest) ([]byte, int, error)
+
+	// GetEscrowAccounts retrieves details for all escrow accounts for a supplied wallet
+	// Returns: response body, status code, error
+	GetEscrowAccounts(ctx context.Context, req *EscrowAccountsRequest) ([]byte, int, error)
+
+	// GetInventoryForCollection Retrieves details for all NFTs owned by a wallet for a collection
+	// Returns: response body, status code, error
+	GetInventoryForCollection(ctx context.Context, req *InventoryForCollectionRequest) ([]byte, int, error)
+
 }

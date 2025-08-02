@@ -17,6 +17,19 @@ type ListingsRequest struct {
 	Currencies []string `json:"currencies,omitempty"`
 }
 
+// InventoryForCollectionRequest represents the request parameters for getting user inventory for a collection
+type InventoryForCollectionRequest struct {
+	Wallets []string `json:"wallets"`
+	CollId  *string  `json:"collId"`
+	Limit   *int32   `json:"limit"`
+	Cursor  string   `json:"cursor,omitempty"`
+}
+
+// EscrowAccountsRequest  represents the request parameters for getting user escrow accounts
+type EscrowAccountsRequest struct {
+	Owner string `json:"owner"`
+}
+
 // TransactionsRequest represents the request parameters for getting user transactions
 type TransactionsRequest struct {
 	Wallets []string `json:"wallets"`
@@ -310,7 +323,6 @@ func (r *TAmmPoolsRequest) Validate() error {
 	return nil
 }
 
-
 func (r *TransactionsRequest) Validate() error {
 	if len(r.Wallets) == 0 {
 		return fmt.Errorf("at least one wallet address is required")
@@ -343,7 +355,6 @@ func (r *TransactionsRequest) Validate() error {
 		"LOCK_WITHDRAW_COLLATERAL", "LOCK_CLAIM_TOKENS", "LOCK_CLAIM_NFT", "LOCK_ORDER_SELL_NFT", "LOCK_ORDER_BUY_NFT",
 		"LOCK_MARKET_SELL_NFT", "LOCK_MARKET_BUY_NFT",
 	}
-	
 
 	for _, txType := range r.TxTypes {
 		isValid := false
@@ -355,6 +366,40 @@ func (r *TransactionsRequest) Validate() error {
 		}
 		if !isValid {
 			return fmt.Errorf("invalid txType value: %s", txType)
+		}
+	}
+
+	return nil
+}
+
+func (r *EscrowAccountsRequest) Validate() error {
+	if r.Owner == "" {
+		return fmt.Errorf("owner wallet address is required")
+	}
+
+	err := validateSolanaAddress(r.Owner)
+	if err != nil {
+		return fmt.Errorf("invalid owner wallet address: %w", err)
+	}
+	
+	return nil
+}
+
+func (r *InventoryForCollectionRequest) Validate() error {
+
+	if len(r.Wallets) == 0 {
+		return fmt.Errorf("at least one wallet address is required")
+	}
+
+	for _, wallet := range r.Wallets {
+		if err := validateSolanaAddress(wallet); err != nil {
+			return fmt.Errorf("invalid wallet address %s: %w", wallet, err)
+		}
+	}
+
+	if r.Limit != nil {
+		if *r.Limit <= 0 || *r.Limit > 500 {
+			return fmt.Errorf("limit must be between 1 and 500")
 		}
 	}
 
