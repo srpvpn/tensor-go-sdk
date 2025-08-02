@@ -3,14 +3,16 @@ package client
 import (
 	"time"
 
+	"github.com/srpvpn/tensor-go-sdk/api/marketplace"
 	"github.com/srpvpn/tensor-go-sdk/api/user"
 	"github.com/srpvpn/tensor-go-sdk/internal/transport"
 )
 
 // Client is the main SDK client that provides access to all API endpoints
 type Client struct {
-	transport transport.Transport
-	User      user.UserAPI
+	transport   transport.Transport
+	User        user.UserAPI
+	Marketplace marketplace.MarketplaceAPI
 }
 
 const (
@@ -47,11 +49,14 @@ func New(config *Config) *Client {
 	transport := NewTransport(*config)
 	// Create User API with transport
 	userAPI := user.New(transport)
+	// Create Marketplace API with transport
+	marketplaceAPI := marketplace.New(transport)
 
 	// Return initialized client
 	return &Client{
-		transport: transport,
-		User:      userAPI,
+		transport:   transport,
+		User:        userAPI,
+		Marketplace: marketplaceAPI,
 	}
 }
 
