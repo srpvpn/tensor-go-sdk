@@ -29,6 +29,66 @@ type BuyNFTResponse struct {
 	Txs []Transaction `json:"txs"`
 }
 
+// SellNFTRequest represents the request parameters for selling an NFT (accepting a bid)
+type SellNFTRequest struct {
+	Seller                string  `json:"seller"`
+	Mint                  string  `json:"mint"`
+	BidAddress            string  `json:"bidAddress"`
+	MinPrice              float64 `json:"minPrice"`
+	Blockhash             string  `json:"blockhash"`
+	TakerBroker           *string `json:"takerBroker,omitempty"`
+	FeePayer              *string `json:"feePayer,omitempty"`
+	OptionalRoyaltyPct    *int32  `json:"optionalRoyaltyPct,omitempty"`
+	Currency              *string `json:"currency,omitempty"`
+	DelegateSigner        *bool   `json:"delegateSigner,omitempty"`
+	IncludeProof          *bool   `json:"includeProof,omitempty"`
+	Compute               *int32  `json:"compute,omitempty"`
+	PriorityMicroLamports *int32  `json:"priorityMicroLamports,omitempty"`
+}
+
+// SellNFTResponse represents the response from the sell NFT API
+type SellNFTResponse struct {
+	Txs []Transaction `json:"txs"`
+}
+
+// ListNFTRequest represents the request parameters for listing an NFT
+type ListNFTRequest struct {
+	Mint                  string  `json:"mint"`
+	Owner                 string  `json:"owner"`
+	Price                 float64 `json:"price"`
+	Blockhash             string  `json:"blockhash"`
+	MakerBroker           *string `json:"makerBroker,omitempty"`
+	Payer                 *string `json:"payer,omitempty"`
+	FeePayer              *string `json:"feePayer,omitempty"`
+	RentPayer             *string `json:"rentPayer,omitempty"`
+	Currency              *string `json:"currency,omitempty"`
+	ExpireIn              *int32  `json:"expireIn,omitempty"`
+	PrivateTaker          *string `json:"privateTaker,omitempty"`
+	DelegateSigner        *bool   `json:"delegateSigner,omitempty"`
+	Compute               *int32  `json:"compute,omitempty"`
+	PriorityMicroLamports *int32  `json:"priorityMicroLamports,omitempty"`
+}
+
+// ListNFTResponse represents the response from the list NFT API
+type ListNFTResponse struct {
+	Txs []Transaction `json:"txs"`
+}
+
+// DelistNFTRequest represents the request parameters for delisting an NFT
+type DelistNFTRequest struct {
+	Mint                  string  `json:"mint"`
+	Owner                 string  `json:"owner"`
+	Blockhash             string  `json:"blockhash"`
+	FeePayer              *string `json:"feePayer,omitempty"`
+	Compute               *int32  `json:"compute,omitempty"`
+	PriorityMicroLamports *int32  `json:"priorityMicroLamports,omitempty"`
+}
+
+// DelistNFTResponse represents the response from the delist NFT API
+type DelistNFTResponse struct {
+	Txs []Transaction `json:"txs"`
+}
+
 // Transaction represents a transaction in the response
 type Transaction struct {
 	Tx                   *string                `json:"tx"`
@@ -157,6 +217,202 @@ func (r *BuyNFTRequest) UnmarshalJSON(data []byte) error {
 	r.Mint = strings.TrimSpace(r.Mint)
 	r.Owner = strings.TrimSpace(r.Owner)
 	r.Blockhash = strings.TrimSpace(r.Blockhash)
+
+	return nil
+}
+
+// Validate validates the SellNFTRequest fields
+func (r *SellNFTRequest) Validate() error {
+	if r.Seller == "" {
+		return fmt.Errorf("seller address is required")
+	}
+
+	if err := validateSolanaAddress(r.Seller); err != nil {
+		return fmt.Errorf("invalid seller address: %w", err)
+	}
+
+	if r.Mint == "" {
+		return fmt.Errorf("mint address is required")
+	}
+
+	if err := validateSolanaAddress(r.Mint); err != nil {
+		return fmt.Errorf("invalid mint address: %w", err)
+	}
+
+	if r.BidAddress == "" {
+		return fmt.Errorf("bidAddress is required")
+	}
+
+	if err := validateSolanaAddress(r.BidAddress); err != nil {
+		return fmt.Errorf("invalid bidAddress: %w", err)
+	}
+
+	if r.MinPrice < 0 {
+		return fmt.Errorf("minPrice must be >= 0")
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
+	}
+
+	// Validate optional addresses if provided
+	if r.TakerBroker != nil {
+		if err := validateSolanaAddress(*r.TakerBroker); err != nil {
+			return fmt.Errorf("invalid takerBroker address: %w", err)
+		}
+	}
+
+	if r.FeePayer != nil {
+		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+			return fmt.Errorf("invalid feePayer address: %w", err)
+		}
+	}
+
+	if r.Currency != nil {
+		if err := validateSolanaAddress(*r.Currency); err != nil {
+			return fmt.Errorf("invalid currency address: %w", err)
+		}
+	}
+
+	// Validate optional royalty percent
+	if r.OptionalRoyaltyPct != nil {
+		if *r.OptionalRoyaltyPct < 0 || *r.OptionalRoyaltyPct > 100 {
+			return fmt.Errorf("optionalRoyaltyPct must be between 0 and 100")
+		}
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
+
+	return nil
+}
+
+// Validate validates the ListNFTRequest fields
+func (r *ListNFTRequest) Validate() error {
+	if r.Mint == "" {
+		return fmt.Errorf("mint address is required")
+	}
+
+	if err := validateSolanaAddress(r.Mint); err != nil {
+		return fmt.Errorf("invalid mint address: %w", err)
+	}
+
+	if r.Owner == "" {
+		return fmt.Errorf("owner address is required")
+	}
+
+	if err := validateSolanaAddress(r.Owner); err != nil {
+		return fmt.Errorf("invalid owner address: %w", err)
+	}
+
+	if r.Price < 0 {
+		return fmt.Errorf("price must be >= 0")
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
+	}
+
+	// Validate optional addresses if provided
+	if r.MakerBroker != nil {
+		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+			return fmt.Errorf("invalid makerBroker address: %w", err)
+		}
+	}
+
+	if r.Payer != nil {
+		if err := validateSolanaAddress(*r.Payer); err != nil {
+			return fmt.Errorf("invalid payer address: %w", err)
+		}
+	}
+
+	if r.FeePayer != nil {
+		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+			return fmt.Errorf("invalid feePayer address: %w", err)
+		}
+	}
+
+	if r.RentPayer != nil {
+		if err := validateSolanaAddress(*r.RentPayer); err != nil {
+			return fmt.Errorf("invalid rentPayer address: %w", err)
+		}
+	}
+
+	if r.Currency != nil {
+		if err := validateSolanaAddress(*r.Currency); err != nil {
+			return fmt.Errorf("invalid currency address: %w", err)
+		}
+	}
+
+	if r.PrivateTaker != nil {
+		if err := validateSolanaAddress(*r.PrivateTaker); err != nil {
+			return fmt.Errorf("invalid privateTaker address: %w", err)
+		}
+	}
+
+	// Validate expireIn
+	if r.ExpireIn != nil && *r.ExpireIn < 0 {
+		return fmt.Errorf("expireIn must be >= 0")
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
+
+	return nil
+}
+
+// Validate validates the DelistNFTRequest fields
+func (r *DelistNFTRequest) Validate() error {
+	if r.Mint == "" {
+		return fmt.Errorf("mint address is required")
+	}
+
+	if err := validateSolanaAddress(r.Mint); err != nil {
+		return fmt.Errorf("invalid mint address: %w", err)
+	}
+
+	if r.Owner == "" {
+		return fmt.Errorf("owner address is required")
+	}
+
+	if err := validateSolanaAddress(r.Owner); err != nil {
+		return fmt.Errorf("invalid owner address: %w", err)
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
+	}
+
+	// Validate optional addresses if provided
+	if r.FeePayer != nil {
+		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+			return fmt.Errorf("invalid feePayer address: %w", err)
+		}
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
 
 	return nil
 }

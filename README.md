@@ -95,6 +95,9 @@ Custom error types: APIError, NetworkError, ValidationError
 
 ### Marketplace API
 - `GET /api/v1/tx/buy` - Create NFT purchase transaction
+- `GET /api/v1/tx/sell` - Create NFT sell transaction (accept bid)
+- `GET /api/v1/tx/list` - Create NFT listing transaction
+- `GET /api/v1/tx/delist` - Create NFT delisting transaction
 
 🧪 Running Tests
 ```go

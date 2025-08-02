@@ -324,3 +324,241 @@ func int32Ptr(i int32) *int32 {
 func contains(s, substr string) bool {
 	return strings.Contains(s, substr)
 }
+func TestSellNFTRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *SellNFTRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &SellNFTRequest{
+				Seller:     "11111111111111111111111111111112",
+				Mint:       "11111111111111111111111111111113",
+				BidAddress: "11111111111111111111111111111114",
+				MinPrice:   1.5,
+				Blockhash:  "11111111111111111111111111111115",
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty seller",
+			request: &SellNFTRequest{
+				Seller:     "",
+				Mint:       "11111111111111111111111111111113",
+				BidAddress: "11111111111111111111111111111114",
+				MinPrice:   1.5,
+				Blockhash:  "11111111111111111111111111111115",
+			},
+			wantErr: true,
+			errMsg:  "seller address is required",
+		},
+		{
+			name: "empty bidAddress",
+			request: &SellNFTRequest{
+				Seller:     "11111111111111111111111111111112",
+				Mint:       "11111111111111111111111111111113",
+				BidAddress: "",
+				MinPrice:   1.5,
+				Blockhash:  "11111111111111111111111111111115",
+			},
+			wantErr: true,
+			errMsg:  "bidAddress is required",
+		},
+		{
+			name: "negative min price",
+			request: &SellNFTRequest{
+				Seller:     "11111111111111111111111111111112",
+				Mint:       "11111111111111111111111111111113",
+				BidAddress: "11111111111111111111111111111114",
+				MinPrice:   -1.0,
+				Blockhash:  "11111111111111111111111111111115",
+			},
+			wantErr: true,
+			errMsg:  "minPrice must be >= 0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("SellNFTRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("SellNFTRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("SellNFTRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestListNFTRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *ListNFTRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &ListNFTRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "11111111111111111111111111111113",
+				Price:     2.5,
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty mint",
+			request: &ListNFTRequest{
+				Mint:      "",
+				Owner:     "11111111111111111111111111111113",
+				Price:     2.5,
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "mint address is required",
+		},
+		{
+			name: "empty owner",
+			request: &ListNFTRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "",
+				Price:     2.5,
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "owner address is required",
+		},
+		{
+			name: "negative price",
+			request: &ListNFTRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "11111111111111111111111111111113",
+				Price:     -1.0,
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "price must be >= 0",
+		},
+		{
+			name: "negative expireIn",
+			request: &ListNFTRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "11111111111111111111111111111113",
+				Price:     2.5,
+				Blockhash: "11111111111111111111111111111114",
+				ExpireIn:  int32Ptr(-1),
+			},
+			wantErr: true,
+			errMsg:  "expireIn must be >= 0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("ListNFTRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("ListNFTRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("ListNFTRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestDelistNFTRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *DelistNFTRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &DelistNFTRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "11111111111111111111111111111113",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty mint",
+			request: &DelistNFTRequest{
+				Mint:      "",
+				Owner:     "11111111111111111111111111111113",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "mint address is required",
+		},
+		{
+			name: "empty owner",
+			request: &DelistNFTRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "owner address is required",
+		},
+		{
+			name: "empty blockhash",
+			request: &DelistNFTRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "11111111111111111111111111111113",
+				Blockhash: "",
+			},
+			wantErr: true,
+			errMsg:  "blockhash is required",
+		},
+		{
+			name: "negative compute",
+			request: &DelistNFTRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "11111111111111111111111111111113",
+				Blockhash: "11111111111111111111111111111114",
+				Compute:   int32Ptr(-1),
+			},
+			wantErr: true,
+			errMsg:  "compute must be >= 0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("DelistNFTRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("DelistNFTRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("DelistNFTRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
