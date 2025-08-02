@@ -7,6 +7,86 @@ import (
 	"strings"
 )
 
+// EditListingRequest represents the request parameters for editing an NFT listing
+type EditListingRequest struct {
+	Mint                  string  `json:"mint"`
+	Owner                 string  `json:"owner"`
+	Price                 float64 `json:"price"`
+	Blockhash             string  `json:"blockhash"`
+	MakerBroker           *string `json:"makerBroker,omitempty"`
+	ExpireIn              *int32  `json:"expireIn,omitempty"`
+	FeePayer              *string `json:"feePayer,omitempty"`
+	Compute               *int32  `json:"compute,omitempty"`
+	PriorityMicroLamports *int32  `json:"priorityMicroLamports,omitempty"`
+}
+
+// EditListingResponse represents the response from the edit listing API
+type EditListingResponse struct {
+	Txs []Transaction `json:"txs"`
+}
+
+// PlaceNFTBidRequest represents the request parameters for placing a bid on a single NFT
+type PlaceNFTBidRequest struct {
+	Owner                 string  `json:"owner"`
+	Price                 float64 `json:"price"`
+	Mint                  string  `json:"mint"`
+	Blockhash             string  `json:"blockhash"`
+	MakerBroker           *string `json:"makerBroker,omitempty"`
+	UseSharedEscrow       *bool   `json:"useSharedEscrow,omitempty"`
+	RentPayer             *string `json:"rentPayer,omitempty"`
+	ExpireIn              *int32  `json:"expireIn,omitempty"`
+	Compute               *int32  `json:"compute,omitempty"`
+	PriorityMicroLamports *int32  `json:"priorityMicroLamports,omitempty"`
+}
+
+// PlaceNFTBidResponse represents the response from the place NFT bid API
+type PlaceNFTBidResponse struct {
+	Message string `json:"message"`
+}
+
+// PlaceTraitBidRequest represents the request parameters for placing a trait bid on a collection
+type PlaceTraitBidRequest struct {
+	Owner                 string   `json:"owner"`
+	Price                 float64  `json:"price"`
+	Quantity              int32    `json:"quantity"`
+	CollId                string   `json:"collId"`
+	Blockhash             string   `json:"blockhash"`
+	MakerBroker           *string  `json:"makerBroker,omitempty"`
+	Traits                []string `json:"traits,omitempty"`
+	UseSharedEscrow       *bool    `json:"useSharedEscrow,omitempty"`
+	RentPayer             *string  `json:"rentPayer,omitempty"`
+	ExpireIn              *int32   `json:"expireIn,omitempty"`
+	Compute               *int32   `json:"compute,omitempty"`
+	PriorityMicroLamports *int32   `json:"priorityMicroLamports,omitempty"`
+}
+
+// PlaceTraitBidResponse represents the response from the place trait bid API
+type PlaceTraitBidResponse struct {
+	Message string `json:"message"`
+}
+
+// PlaceCollectionBidRequest represents the request parameters for placing a collection wide bid
+type PlaceCollectionBidRequest struct {
+	Owner                 string   `json:"owner"`
+	Price                 float64  `json:"price"`
+	Quantity              int32    `json:"quantity"`
+	CollId                string   `json:"collId"`
+	Blockhash             string   `json:"blockhash"`
+	MakerBroker           *string  `json:"makerBroker,omitempty"`
+	UseSharedEscrow       *bool    `json:"useSharedEscrow,omitempty"`
+	RentPayer             *string  `json:"rentPayer,omitempty"`
+	ExpireIn              *int32   `json:"expireIn,omitempty"`
+	TopUp                 *float64 `json:"topUp,omitempty"`
+	Compute               *int32   `json:"compute,omitempty"`
+	PriorityMicroLamports *int32   `json:"priorityMicroLamports,omitempty"`
+}
+
+// PlaceCollectionBidResponse represents the response from the place collection bid API
+type PlaceCollectionBidResponse struct {
+	Message string `json:"message"`
+}
+
+
 // BuyNFTRequest represents the request parameters for buying an NFT
 type BuyNFTRequest struct {
 	Buyer                 string  `json:"buyer"`
@@ -402,6 +482,240 @@ func (r *DelistNFTRequest) Validate() error {
 		if err := validateSolanaAddress(*r.FeePayer); err != nil {
 			return fmt.Errorf("invalid feePayer address: %w", err)
 		}
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
+
+	return nil
+}
+
+
+// Validate validates the EditListingRequest fields
+func (r *EditListingRequest) Validate() error {
+	if r.Mint == "" {
+		return fmt.Errorf("mint address is required")
+	}
+
+	if err := validateSolanaAddress(r.Mint); err != nil {
+		return fmt.Errorf("invalid mint address: %w", err)
+	}
+
+	if r.Owner == "" {
+		return fmt.Errorf("owner address is required")
+	}
+
+	if err := validateSolanaAddress(r.Owner); err != nil {
+		return fmt.Errorf("invalid owner address: %w", err)
+	}
+
+	if r.Price < 0 {
+		return fmt.Errorf("price must be >= 0")
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
+	}
+
+	// Validate optional addresses if provided
+	if r.MakerBroker != nil {
+		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+			return fmt.Errorf("invalid makerBroker address: %w", err)
+		}
+	}
+
+	if r.FeePayer != nil {
+		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+			return fmt.Errorf("invalid feePayer address: %w", err)
+		}
+	}
+
+	// Validate expireIn
+	if r.ExpireIn != nil && *r.ExpireIn < 0 {
+		return fmt.Errorf("expireIn must be >= 0")
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
+
+	return nil
+}
+
+// Validate validates the PlaceNFTBidRequest fields
+func (r *PlaceNFTBidRequest) Validate() error {
+	if r.Owner == "" {
+		return fmt.Errorf("owner address is required")
+	}
+
+	if err := validateSolanaAddress(r.Owner); err != nil {
+		return fmt.Errorf("invalid owner address: %w", err)
+	}
+
+	if r.Price < 0 {
+		return fmt.Errorf("price must be >= 0")
+	}
+
+	if r.Mint == "" {
+		return fmt.Errorf("mint address is required")
+	}
+
+	if err := validateSolanaAddress(r.Mint); err != nil {
+		return fmt.Errorf("invalid mint address: %w", err)
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
+	}
+
+	// Validate optional addresses if provided
+	if r.MakerBroker != nil {
+		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+			return fmt.Errorf("invalid makerBroker address: %w", err)
+		}
+	}
+
+	if r.RentPayer != nil {
+		if err := validateSolanaAddress(*r.RentPayer); err != nil {
+			return fmt.Errorf("invalid rentPayer address: %w", err)
+		}
+	}
+
+	// Validate expireIn
+	if r.ExpireIn != nil && *r.ExpireIn < 0 {
+		return fmt.Errorf("expireIn must be >= 0")
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
+
+	return nil
+}
+
+// Validate validates the PlaceTraitBidRequest fields
+func (r *PlaceTraitBidRequest) Validate() error {
+	if r.Owner == "" {
+		return fmt.Errorf("owner address is required")
+	}
+
+	if err := validateSolanaAddress(r.Owner); err != nil {
+		return fmt.Errorf("invalid owner address: %w", err)
+	}
+
+	if r.Price < 0 {
+		return fmt.Errorf("price must be >= 0")
+	}
+
+	if r.Quantity < 1 {
+		return fmt.Errorf("quantity must be >= 1")
+	}
+
+	if r.CollId == "" {
+		return fmt.Errorf("collId is required")
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
+	}
+
+	// Validate optional addresses if provided
+	if r.MakerBroker != nil {
+		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+			return fmt.Errorf("invalid makerBroker address: %w", err)
+		}
+	}
+
+	if r.RentPayer != nil {
+		if err := validateSolanaAddress(*r.RentPayer); err != nil {
+			return fmt.Errorf("invalid rentPayer address: %w", err)
+		}
+	}
+
+	// Validate expireIn
+	if r.ExpireIn != nil && *r.ExpireIn < 0 {
+		return fmt.Errorf("expireIn must be >= 0")
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
+
+	return nil
+}
+
+// Validate validates the PlaceCollectionBidRequest fields
+func (r *PlaceCollectionBidRequest) Validate() error {
+	if r.Owner == "" {
+		return fmt.Errorf("owner address is required")
+	}
+
+	if err := validateSolanaAddress(r.Owner); err != nil {
+		return fmt.Errorf("invalid owner address: %w", err)
+	}
+
+	if r.Price < 0 {
+		return fmt.Errorf("price must be >= 0")
+	}
+
+	if r.Quantity < 1 {
+		return fmt.Errorf("quantity must be >= 1")
+	}
+
+	if r.CollId == "" {
+		return fmt.Errorf("collId is required")
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
+	}
+
+	// Validate optional addresses if provided
+	if r.MakerBroker != nil {
+		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+			return fmt.Errorf("invalid makerBroker address: %w", err)
+		}
+	}
+
+	if r.RentPayer != nil {
+		if err := validateSolanaAddress(*r.RentPayer); err != nil {
+			return fmt.Errorf("invalid rentPayer address: %w", err)
+		}
+	}
+
+	// Validate expireIn
+	if r.ExpireIn != nil && *r.ExpireIn < 0 {
+		return fmt.Errorf("expireIn must be >= 0")
+	}
+
+	// Validate topUp
+	if r.TopUp != nil && *r.TopUp < 0 {
+		return fmt.Errorf("topUp must be >= 0")
 	}
 
 	// Validate compute units

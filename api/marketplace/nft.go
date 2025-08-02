@@ -77,3 +77,21 @@ func (m *marketplaceAPI) DelistNFT(ctx context.Context, req *DelistNFTRequest) (
 
 	return &response, statusCode, nil
 }
+
+// EditListing creates the transaction to edit an NFT listing
+// Returns: response body, status code, error
+func (m *marketplaceAPI) EditListing(ctx context.Context, req *EditListingRequest) (*EditListingResponse, int, error) {
+	// Execute the request using the helper method
+	body, statusCode, err := m.executeRequest(ctx, "/api/v1/tx/edit", req)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	// Parse the JSON response into the structured response
+	var response EditListingResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, statusCode, fmt.Errorf("failed to parse response JSON: %w", err)
+	}
+
+	return &response, statusCode, nil
+}

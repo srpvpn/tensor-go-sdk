@@ -562,3 +562,258 @@ func TestDelistNFTRequest_Validate(t *testing.T) {
 		})
 	}
 }
+func TestEditListingRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *EditListingRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &EditListingRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "11111111111111111111111111111113",
+				Price:     2.5,
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty mint",
+			request: &EditListingRequest{
+				Mint:      "",
+				Owner:     "11111111111111111111111111111113",
+				Price:     2.5,
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "mint address is required",
+		},
+		{
+			name: "negative price",
+			request: &EditListingRequest{
+				Mint:      "11111111111111111111111111111112",
+				Owner:     "11111111111111111111111111111113",
+				Price:     -1.0,
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "price must be >= 0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("EditListingRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("EditListingRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("EditListingRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestPlaceNFTBidRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *PlaceNFTBidRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &PlaceNFTBidRequest{
+				Owner:     "11111111111111111111111111111112",
+				Price:     1.5,
+				Mint:      "11111111111111111111111111111113",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty owner",
+			request: &PlaceNFTBidRequest{
+				Owner:     "",
+				Price:     1.5,
+				Mint:      "11111111111111111111111111111113",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "owner address is required",
+		},
+		{
+			name: "negative price",
+			request: &PlaceNFTBidRequest{
+				Owner:     "11111111111111111111111111111112",
+				Price:     -1.0,
+				Mint:      "11111111111111111111111111111113",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "price must be >= 0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("PlaceNFTBidRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("PlaceNFTBidRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("PlaceNFTBidRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestPlaceTraitBidRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *PlaceTraitBidRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &PlaceTraitBidRequest{
+				Owner:     "11111111111111111111111111111112",
+				Price:     1.5,
+				Quantity:  2,
+				CollId:    "collection123",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: false,
+		},
+		{
+			name: "zero quantity",
+			request: &PlaceTraitBidRequest{
+				Owner:     "11111111111111111111111111111112",
+				Price:     1.5,
+				Quantity:  0,
+				CollId:    "collection123",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "quantity must be >= 1",
+		},
+		{
+			name: "empty collId",
+			request: &PlaceTraitBidRequest{
+				Owner:     "11111111111111111111111111111112",
+				Price:     1.5,
+				Quantity:  2,
+				CollId:    "",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "collId is required",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("PlaceTraitBidRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("PlaceTraitBidRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("PlaceTraitBidRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestPlaceCollectionBidRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *PlaceCollectionBidRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &PlaceCollectionBidRequest{
+				Owner:     "11111111111111111111111111111112",
+				Price:     1.5,
+				Quantity:  3,
+				CollId:    "collection123",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: false,
+		},
+		{
+			name: "zero quantity",
+			request: &PlaceCollectionBidRequest{
+				Owner:     "11111111111111111111111111111112",
+				Price:     1.5,
+				Quantity:  0,
+				CollId:    "collection123",
+				Blockhash: "11111111111111111111111111111114",
+			},
+			wantErr: true,
+			errMsg:  "quantity must be >= 1",
+		},
+		{
+			name: "negative topUp",
+			request: &PlaceCollectionBidRequest{
+				Owner:     "11111111111111111111111111111112",
+				Price:     1.5,
+				Quantity:  3,
+				CollId:    "collection123",
+				Blockhash: "11111111111111111111111111111114",
+				TopUp:     float64Ptr(-1.0),
+			},
+			wantErr: true,
+			errMsg:  "topUp must be >= 0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("PlaceCollectionBidRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("PlaceCollectionBidRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("PlaceCollectionBidRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+// Helper function for float64 pointer
+func float64Ptr(f float64) *float64 {
+	return &f
+}

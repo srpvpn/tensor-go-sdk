@@ -24,4 +24,20 @@ type MarketplaceAPI interface {
 	// DelistNFT creates the transaction to delist an NFT
 	// Returns: response body, status code, error
 	DelistNFT(ctx context.Context, req *DelistNFTRequest) (*DelistNFTResponse, int, error)
+
+	// EditListing creates the transaction to edit an NFT listing
+	// Returns: response body, status code, error
+	EditListing(ctx context.Context, req *EditListingRequest) (*EditListingResponse, int, error)
+
+	// PlaceNFTBid creates the transaction to place a bid on a single NFT
+	// Returns: response body, status code, error
+	PlaceNFTBid(ctx context.Context, req *PlaceNFTBidRequest) (*PlaceNFTBidResponse, int, error)
+
+	// PlaceTraitBid creates the transaction to place a trait bid on a collection
+	// Returns: response body, status code, error
+	PlaceTraitBid(ctx context.Context, req *PlaceTraitBidRequest) (*PlaceTraitBidResponse, int, error)
+
+	// PlaceCollectionBid creates the transaction to place a collection wide bid
+	// Returns: response body, status code, error
+	PlaceCollectionBid(ctx context.Context, req *PlaceCollectionBidRequest) (*PlaceCollectionBidResponse, int, error)
 }

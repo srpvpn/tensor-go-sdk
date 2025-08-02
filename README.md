@@ -98,6 +98,10 @@ Custom error types: APIError, NetworkError, ValidationError
 - `GET /api/v1/tx/sell` - Create NFT sell transaction (accept bid)
 - `GET /api/v1/tx/list` - Create NFT listing transaction
 - `GET /api/v1/tx/delist` - Create NFT delisting transaction
+- `GET /api/v1/tx/edit` - Create NFT listing edit transaction
+- `GET /api/v1/tx/bid` - Create single NFT bid transaction
+- `GET /api/v1/tx/trait_bid` - Create trait bid transaction
+- `GET /api/v1/tx/collection_bid` - Create collection bid transaction
 
 🧪 Running Tests
 ```go
