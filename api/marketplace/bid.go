@@ -59,3 +59,39 @@ func (m *marketplaceAPI) PlaceCollectionBid(ctx context.Context, req *PlaceColle
 
 	return &response, statusCode, nil
 }
+
+// EditBid creates the transaction to edit a bid
+// Returns: response body, status code, error
+func (m *marketplaceAPI) EditBid(ctx context.Context, req *EditBidRequest) (*EditBidResponse, int, error) {
+	// Execute the request using the helper method
+	body, statusCode, err := m.executeRequest(ctx, "/api/v1/tx/edit_bid", req)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	// Parse the JSON response into the structured response
+	var response EditBidResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, statusCode, fmt.Errorf("failed to parse response JSON: %w", err)
+	}
+
+	return &response, statusCode, nil
+}
+
+// CancelBid creates the transaction to cancel a bid
+// Returns: response body, status code, error
+func (m *marketplaceAPI) CancelBid(ctx context.Context, req *CancelBidRequest) (*CancelBidResponse, int, error) {
+	// Execute the request using the helper method
+	body, statusCode, err := m.executeRequest(ctx, "/api/v1/tx/cancel_bid", req)
+	if err != nil {
+		return nil, statusCode, err
+	}
+
+	// Parse the JSON response into the structured response
+	var response CancelBidResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, statusCode, fmt.Errorf("failed to parse response JSON: %w", err)
+	}
+
+	return &response, statusCode, nil
+}

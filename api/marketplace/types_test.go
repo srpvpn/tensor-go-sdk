@@ -817,3 +817,195 @@ func TestPlaceCollectionBidRequest_Validate(t *testing.T) {
 func float64Ptr(f float64) *float64 {
 	return &f
 }
+func TestEditBidRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *EditBidRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &EditBidRequest{
+				BidStateAddress: "11111111111111111111111111111112",
+				Blockhash:       "11111111111111111111111111111113",
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty bidStateAddress",
+			request: &EditBidRequest{
+				BidStateAddress: "",
+				Blockhash:       "11111111111111111111111111111113",
+			},
+			wantErr: true,
+			errMsg:  "bidStateAddress is required",
+		},
+		{
+			name: "invalid bidStateAddress",
+			request: &EditBidRequest{
+				BidStateAddress: "invalid",
+				Blockhash:       "11111111111111111111111111111113",
+			},
+			wantErr: true,
+			errMsg:  "invalid bidStateAddress",
+		},
+		{
+			name: "empty blockhash",
+			request: &EditBidRequest{
+				BidStateAddress: "11111111111111111111111111111112",
+				Blockhash:       "",
+			},
+			wantErr: true,
+			errMsg:  "blockhash is required",
+		},
+		{
+			name: "negative price",
+			request: &EditBidRequest{
+				BidStateAddress: "11111111111111111111111111111112",
+				Blockhash:       "11111111111111111111111111111113",
+				Price:           float64Ptr(-1.0),
+			},
+			wantErr: true,
+			errMsg:  "price must be >= 0",
+		},
+		{
+			name: "zero quantity",
+			request: &EditBidRequest{
+				BidStateAddress: "11111111111111111111111111111112",
+				Blockhash:       "11111111111111111111111111111113",
+				Quantity:        int32Ptr(0),
+			},
+			wantErr: true,
+			errMsg:  "quantity must be >= 1",
+		},
+		{
+			name: "negative expireIn",
+			request: &EditBidRequest{
+				BidStateAddress: "11111111111111111111111111111112",
+				Blockhash:       "11111111111111111111111111111113",
+				ExpireIn:        int32Ptr(-1),
+			},
+			wantErr: true,
+			errMsg:  "expireIn must be >= 0",
+		},
+		{
+			name: "valid request with all optional fields",
+			request: &EditBidRequest{
+				BidStateAddress:       "11111111111111111111111111111112",
+				Blockhash:             "11111111111111111111111111111113",
+				Price:                 float64Ptr(2.5),
+				Quantity:              int32Ptr(3),
+				ExpireIn:              int32Ptr(3600),
+				PrivateTaker:          stringPtr("11111111111111111111111111111114"),
+				UseSharedEscrow:       boolPtr(true),
+				Compute:               int32Ptr(200000),
+				PriorityMicroLamports: int32Ptr(1000),
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("EditBidRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("EditBidRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("EditBidRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestCancelBidRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		request *CancelBidRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			request: &CancelBidRequest{
+				BidStateAddress: "11111111111111111111111111111112",
+				Blockhash:       "11111111111111111111111111111113",
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty bidStateAddress",
+			request: &CancelBidRequest{
+				BidStateAddress: "",
+				Blockhash:       "11111111111111111111111111111113",
+			},
+			wantErr: true,
+			errMsg:  "bidStateAddress is required",
+		},
+		{
+			name: "invalid bidStateAddress",
+			request: &CancelBidRequest{
+				BidStateAddress: "invalid",
+				Blockhash:       "11111111111111111111111111111113",
+			},
+			wantErr: true,
+			errMsg:  "invalid bidStateAddress",
+		},
+		{
+			name: "empty blockhash",
+			request: &CancelBidRequest{
+				BidStateAddress: "11111111111111111111111111111112",
+				Blockhash:       "",
+			},
+			wantErr: true,
+			errMsg:  "blockhash is required",
+		},
+		{
+			name: "negative compute",
+			request: &CancelBidRequest{
+				BidStateAddress: "11111111111111111111111111111112",
+				Blockhash:       "11111111111111111111111111111113",
+				Compute:         int32Ptr(-1),
+			},
+			wantErr: true,
+			errMsg:  "compute must be >= 0",
+		},
+		{
+			name: "valid request with optional fields",
+			request: &CancelBidRequest{
+				BidStateAddress:       "11111111111111111111111111111112",
+				Blockhash:             "11111111111111111111111111111113",
+				Compute:               int32Ptr(200000),
+				PriorityMicroLamports: int32Ptr(1000),
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.request.Validate()
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("CancelBidRequest.Validate() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errMsg != "" && !contains(err.Error(), tt.errMsg) {
+					t.Errorf("CancelBidRequest.Validate() error = %v, want error containing %v", err, tt.errMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("CancelBidRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}

@@ -25,6 +25,39 @@ type EditListingResponse struct {
 	Txs []Transaction `json:"txs"`
 }
 
+// EditBidRequest represents the request parameters for editing a bid
+type EditBidRequest struct {
+	BidStateAddress       string   `json:"bidStateAddress"`
+	Blockhash             string   `json:"blockhash"`
+	Price                 *float64 `json:"price,omitempty"`
+	Quantity              *int32   `json:"quantity,omitempty"`
+	ExpireIn              *int32   `json:"expireIn,omitempty"`
+	PrivateTaker          *string  `json:"privateTaker,omitempty"`
+	UseSharedEscrow       *bool    `json:"useSharedEscrow,omitempty"`
+	Compute               *int32   `json:"compute,omitempty"`
+	PriorityMicroLamports *int32   `json:"priorityMicroLamports,omitempty"`
+}
+
+// EditBidResponse represents the response from the edit bid API
+type EditBidResponse struct {
+	Txs      []Transaction `json:"txs"`
+	BidState string        `json:"bidState"`
+}
+
+// CancelBidRequest represents the request parameters for canceling a bid
+type CancelBidRequest struct {
+	BidStateAddress       string `json:"bidStateAddress"`
+	Blockhash             string `json:"blockhash"`
+	Compute               *int32 `json:"compute,omitempty"`
+	PriorityMicroLamports *int32 `json:"priorityMicroLamports,omitempty"`
+}
+
+// CancelBidResponse represents the response from the cancel bid API
+type CancelBidResponse struct {
+	Txs      []Transaction `json:"txs"`
+	BidState string        `json:"bidState"`
+}
+
 // PlaceNFTBidRequest represents the request parameters for placing a bid on a single NFT
 type PlaceNFTBidRequest struct {
 	Owner                 string  `json:"owner"`
@@ -85,7 +118,6 @@ type PlaceCollectionBidRequest struct {
 type PlaceCollectionBidResponse struct {
 	Message string `json:"message"`
 }
-
 
 // BuyNFTRequest represents the request parameters for buying an NFT
 type BuyNFTRequest struct {
@@ -497,7 +529,6 @@ func (r *DelistNFTRequest) Validate() error {
 	return nil
 }
 
-
 // Validate validates the EditListingRequest fields
 func (r *EditListingRequest) Validate() error {
 	if r.Mint == "" {
@@ -716,6 +747,84 @@ func (r *PlaceCollectionBidRequest) Validate() error {
 	// Validate topUp
 	if r.TopUp != nil && *r.TopUp < 0 {
 		return fmt.Errorf("topUp must be >= 0")
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
+
+	return nil
+}
+
+
+
+// Validate validates the EditBidRequest fields
+func (r *EditBidRequest) Validate() error {
+	if r.BidStateAddress == "" {
+		return fmt.Errorf("bidStateAddress is required")
+	}
+
+	if err := validateSolanaAddress(r.BidStateAddress); err != nil {
+		return fmt.Errorf("invalid bidStateAddress: %w", err)
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
+	}
+
+	// Validate price if provided
+	if r.Price != nil && *r.Price < 0 {
+		return fmt.Errorf("price must be >= 0")
+	}
+
+	// Validate quantity if provided
+	if r.Quantity != nil && *r.Quantity < 1 {
+		return fmt.Errorf("quantity must be >= 1")
+	}
+
+	// Validate expireIn if provided
+	if r.ExpireIn != nil && *r.ExpireIn < 0 {
+		return fmt.Errorf("expireIn must be >= 0")
+	}
+
+	// Validate privateTaker if provided
+	if r.PrivateTaker != nil {
+		if err := validateSolanaAddress(*r.PrivateTaker); err != nil {
+			return fmt.Errorf("invalid privateTaker address: %w", err)
+		}
+	}
+
+	// Validate compute units
+	if r.Compute != nil && *r.Compute < 0 {
+		return fmt.Errorf("compute must be >= 0")
+	}
+
+	// Validate priority micro lamports
+	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
+		return fmt.Errorf("priorityMicroLamports must be >= 0")
+	}
+
+	return nil
+}
+
+// Validate validates the CancelBidRequest fields
+func (r *CancelBidRequest) Validate() error {
+	if r.BidStateAddress == "" {
+		return fmt.Errorf("bidStateAddress is required")
+	}
+
+	if err := validateSolanaAddress(r.BidStateAddress); err != nil {
+		return fmt.Errorf("invalid bidStateAddress: %w", err)
+	}
+
+	if r.Blockhash == "" {
+		return fmt.Errorf("blockhash is required")
 	}
 
 	// Validate compute units

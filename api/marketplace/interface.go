@@ -40,4 +40,12 @@ type MarketplaceAPI interface {
 	// PlaceCollectionBid creates the transaction to place a collection wide bid
 	// Returns: response body, status code, error
 	PlaceCollectionBid(ctx context.Context, req *PlaceCollectionBidRequest) (*PlaceCollectionBidResponse, int, error)
+
+	// EditBid creates the transaction to edit a bid
+	// Returns: response body, status code, error
+	EditBid(ctx context.Context, req *EditBidRequest) (*EditBidResponse, int, error)
+
+	// CancelBid creates the transaction to cancel a bid
+	// Returns: response body, status code, error
+	CancelBid(ctx context.Context, req *CancelBidRequest) (*CancelBidResponse, int, error)
 }
