@@ -3,8 +3,9 @@ package marketplace
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"strings"
+
+	"github.com/srpvpn/tensor-go-sdk/internal/utils"
 )
 
 // EditListingRequest represents the request parameters for editing an NFT listing
@@ -216,7 +217,7 @@ func (r *BuyNFTRequest) Validate() error {
 		return fmt.Errorf("buyer address is required")
 	}
 
-	if err := validateSolanaAddress(r.Buyer); err != nil {
+	if err := utils.ValidateWalletAddress(r.Buyer); err != nil {
 		return fmt.Errorf("invalid buyer address: %w", err)
 	}
 
@@ -224,7 +225,7 @@ func (r *BuyNFTRequest) Validate() error {
 		return fmt.Errorf("mint address is required")
 	}
 
-	if err := validateSolanaAddress(r.Mint); err != nil {
+	if err := utils.ValidateWalletAddress(r.Mint); err != nil {
 		return fmt.Errorf("invalid mint address: %w", err)
 	}
 
@@ -232,7 +233,7 @@ func (r *BuyNFTRequest) Validate() error {
 		return fmt.Errorf("owner address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner address: %w", err)
 	}
 
@@ -246,25 +247,25 @@ func (r *BuyNFTRequest) Validate() error {
 
 	// Validate optional addresses if provided
 	if r.Payer != nil {
-		if err := validateSolanaAddress(*r.Payer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.Payer); err != nil {
 			return fmt.Errorf("invalid payer address: %w", err)
 		}
 	}
 
 	if r.FeePayer != nil {
-		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.FeePayer); err != nil {
 			return fmt.Errorf("invalid feePayer address: %w", err)
 		}
 	}
 
 	if r.Currency != nil {
-		if err := validateSolanaAddress(*r.Currency); err != nil {
+		if err := utils.ValidateWalletAddress(*r.Currency); err != nil {
 			return fmt.Errorf("invalid currency address: %w", err)
 		}
 	}
 
 	if r.TakerBroker != nil {
-		if err := validateSolanaAddress(*r.TakerBroker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.TakerBroker); err != nil {
 			return fmt.Errorf("invalid takerBroker address: %w", err)
 		}
 	}
@@ -284,22 +285,6 @@ func (r *BuyNFTRequest) Validate() error {
 	// Validate priority micro lamports
 	if r.PriorityMicroLamports != nil && *r.PriorityMicroLamports < 0 {
 		return fmt.Errorf("priorityMicroLamports must be >= 0")
-	}
-
-	return nil
-}
-
-// validateSolanaAddress validates that the provided string is a valid Solana address
-func validateSolanaAddress(address string) error {
-	// Solana addresses are base58 encoded and typically 32-44 characters long
-	if len(address) < 32 || len(address) > 44 {
-		return fmt.Errorf("address length must be between 32 and 44 characters")
-	}
-
-	// Check for valid base58 characters (no 0, O, I, l)
-	validBase58 := regexp.MustCompile(`^[1-9A-HJ-NP-Za-km-z]+$`)
-	if !validBase58.MatchString(address) {
-		return fmt.Errorf("address contains invalid characters")
 	}
 
 	return nil
@@ -339,7 +324,7 @@ func (r *SellNFTRequest) Validate() error {
 		return fmt.Errorf("seller address is required")
 	}
 
-	if err := validateSolanaAddress(r.Seller); err != nil {
+	if err := utils.ValidateWalletAddress(r.Seller); err != nil {
 		return fmt.Errorf("invalid seller address: %w", err)
 	}
 
@@ -347,7 +332,7 @@ func (r *SellNFTRequest) Validate() error {
 		return fmt.Errorf("mint address is required")
 	}
 
-	if err := validateSolanaAddress(r.Mint); err != nil {
+	if err := utils.ValidateWalletAddress(r.Mint); err != nil {
 		return fmt.Errorf("invalid mint address: %w", err)
 	}
 
@@ -355,7 +340,7 @@ func (r *SellNFTRequest) Validate() error {
 		return fmt.Errorf("bidAddress is required")
 	}
 
-	if err := validateSolanaAddress(r.BidAddress); err != nil {
+	if err := utils.ValidateWalletAddress(r.BidAddress); err != nil {
 		return fmt.Errorf("invalid bidAddress: %w", err)
 	}
 
@@ -369,19 +354,19 @@ func (r *SellNFTRequest) Validate() error {
 
 	// Validate optional addresses if provided
 	if r.TakerBroker != nil {
-		if err := validateSolanaAddress(*r.TakerBroker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.TakerBroker); err != nil {
 			return fmt.Errorf("invalid takerBroker address: %w", err)
 		}
 	}
 
 	if r.FeePayer != nil {
-		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.FeePayer); err != nil {
 			return fmt.Errorf("invalid feePayer address: %w", err)
 		}
 	}
 
 	if r.Currency != nil {
-		if err := validateSolanaAddress(*r.Currency); err != nil {
+		if err := utils.ValidateWalletAddress(*r.Currency); err != nil {
 			return fmt.Errorf("invalid currency address: %w", err)
 		}
 	}
@@ -412,7 +397,7 @@ func (r *ListNFTRequest) Validate() error {
 		return fmt.Errorf("mint address is required")
 	}
 
-	if err := validateSolanaAddress(r.Mint); err != nil {
+	if err := utils.ValidateWalletAddress(r.Mint); err != nil {
 		return fmt.Errorf("invalid mint address: %w", err)
 	}
 
@@ -420,7 +405,7 @@ func (r *ListNFTRequest) Validate() error {
 		return fmt.Errorf("owner address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner address: %w", err)
 	}
 
@@ -434,37 +419,37 @@ func (r *ListNFTRequest) Validate() error {
 
 	// Validate optional addresses if provided
 	if r.MakerBroker != nil {
-		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.MakerBroker); err != nil {
 			return fmt.Errorf("invalid makerBroker address: %w", err)
 		}
 	}
 
 	if r.Payer != nil {
-		if err := validateSolanaAddress(*r.Payer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.Payer); err != nil {
 			return fmt.Errorf("invalid payer address: %w", err)
 		}
 	}
 
 	if r.FeePayer != nil {
-		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.FeePayer); err != nil {
 			return fmt.Errorf("invalid feePayer address: %w", err)
 		}
 	}
 
 	if r.RentPayer != nil {
-		if err := validateSolanaAddress(*r.RentPayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.RentPayer); err != nil {
 			return fmt.Errorf("invalid rentPayer address: %w", err)
 		}
 	}
 
 	if r.Currency != nil {
-		if err := validateSolanaAddress(*r.Currency); err != nil {
+		if err := utils.ValidateWalletAddress(*r.Currency); err != nil {
 			return fmt.Errorf("invalid currency address: %w", err)
 		}
 	}
 
 	if r.PrivateTaker != nil {
-		if err := validateSolanaAddress(*r.PrivateTaker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.PrivateTaker); err != nil {
 			return fmt.Errorf("invalid privateTaker address: %w", err)
 		}
 	}
@@ -493,7 +478,7 @@ func (r *DelistNFTRequest) Validate() error {
 		return fmt.Errorf("mint address is required")
 	}
 
-	if err := validateSolanaAddress(r.Mint); err != nil {
+	if err := utils.ValidateWalletAddress(r.Mint); err != nil {
 		return fmt.Errorf("invalid mint address: %w", err)
 	}
 
@@ -501,7 +486,7 @@ func (r *DelistNFTRequest) Validate() error {
 		return fmt.Errorf("owner address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner address: %w", err)
 	}
 
@@ -511,7 +496,7 @@ func (r *DelistNFTRequest) Validate() error {
 
 	// Validate optional addresses if provided
 	if r.FeePayer != nil {
-		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.FeePayer); err != nil {
 			return fmt.Errorf("invalid feePayer address: %w", err)
 		}
 	}
@@ -535,7 +520,7 @@ func (r *EditListingRequest) Validate() error {
 		return fmt.Errorf("mint address is required")
 	}
 
-	if err := validateSolanaAddress(r.Mint); err != nil {
+	if err := utils.ValidateWalletAddress(r.Mint); err != nil {
 		return fmt.Errorf("invalid mint address: %w", err)
 	}
 
@@ -543,7 +528,7 @@ func (r *EditListingRequest) Validate() error {
 		return fmt.Errorf("owner address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner address: %w", err)
 	}
 
@@ -557,13 +542,13 @@ func (r *EditListingRequest) Validate() error {
 
 	// Validate optional addresses if provided
 	if r.MakerBroker != nil {
-		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.MakerBroker); err != nil {
 			return fmt.Errorf("invalid makerBroker address: %w", err)
 		}
 	}
 
 	if r.FeePayer != nil {
-		if err := validateSolanaAddress(*r.FeePayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.FeePayer); err != nil {
 			return fmt.Errorf("invalid feePayer address: %w", err)
 		}
 	}
@@ -592,7 +577,7 @@ func (r *PlaceNFTBidRequest) Validate() error {
 		return fmt.Errorf("owner address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner address: %w", err)
 	}
 
@@ -604,7 +589,7 @@ func (r *PlaceNFTBidRequest) Validate() error {
 		return fmt.Errorf("mint address is required")
 	}
 
-	if err := validateSolanaAddress(r.Mint); err != nil {
+	if err := utils.ValidateWalletAddress(r.Mint); err != nil {
 		return fmt.Errorf("invalid mint address: %w", err)
 	}
 
@@ -614,13 +599,13 @@ func (r *PlaceNFTBidRequest) Validate() error {
 
 	// Validate optional addresses if provided
 	if r.MakerBroker != nil {
-		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.MakerBroker); err != nil {
 			return fmt.Errorf("invalid makerBroker address: %w", err)
 		}
 	}
 
 	if r.RentPayer != nil {
-		if err := validateSolanaAddress(*r.RentPayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.RentPayer); err != nil {
 			return fmt.Errorf("invalid rentPayer address: %w", err)
 		}
 	}
@@ -649,7 +634,7 @@ func (r *PlaceTraitBidRequest) Validate() error {
 		return fmt.Errorf("owner address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner address: %w", err)
 	}
 
@@ -671,13 +656,13 @@ func (r *PlaceTraitBidRequest) Validate() error {
 
 	// Validate optional addresses if provided
 	if r.MakerBroker != nil {
-		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.MakerBroker); err != nil {
 			return fmt.Errorf("invalid makerBroker address: %w", err)
 		}
 	}
 
 	if r.RentPayer != nil {
-		if err := validateSolanaAddress(*r.RentPayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.RentPayer); err != nil {
 			return fmt.Errorf("invalid rentPayer address: %w", err)
 		}
 	}
@@ -706,7 +691,7 @@ func (r *PlaceCollectionBidRequest) Validate() error {
 		return fmt.Errorf("owner address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner address: %w", err)
 	}
 
@@ -728,13 +713,13 @@ func (r *PlaceCollectionBidRequest) Validate() error {
 
 	// Validate optional addresses if provided
 	if r.MakerBroker != nil {
-		if err := validateSolanaAddress(*r.MakerBroker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.MakerBroker); err != nil {
 			return fmt.Errorf("invalid makerBroker address: %w", err)
 		}
 	}
 
 	if r.RentPayer != nil {
-		if err := validateSolanaAddress(*r.RentPayer); err != nil {
+		if err := utils.ValidateWalletAddress(*r.RentPayer); err != nil {
 			return fmt.Errorf("invalid rentPayer address: %w", err)
 		}
 	}
@@ -762,15 +747,13 @@ func (r *PlaceCollectionBidRequest) Validate() error {
 	return nil
 }
 
-
-
 // Validate validates the EditBidRequest fields
 func (r *EditBidRequest) Validate() error {
 	if r.BidStateAddress == "" {
 		return fmt.Errorf("bidStateAddress is required")
 	}
 
-	if err := validateSolanaAddress(r.BidStateAddress); err != nil {
+	if err := utils.ValidateWalletAddress(r.BidStateAddress); err != nil {
 		return fmt.Errorf("invalid bidStateAddress: %w", err)
 	}
 
@@ -795,7 +778,7 @@ func (r *EditBidRequest) Validate() error {
 
 	// Validate privateTaker if provided
 	if r.PrivateTaker != nil {
-		if err := validateSolanaAddress(*r.PrivateTaker); err != nil {
+		if err := utils.ValidateWalletAddress(*r.PrivateTaker); err != nil {
 			return fmt.Errorf("invalid privateTaker address: %w", err)
 		}
 	}
@@ -819,7 +802,7 @@ func (r *CancelBidRequest) Validate() error {
 		return fmt.Errorf("bidStateAddress is required")
 	}
 
-	if err := validateSolanaAddress(r.BidStateAddress); err != nil {
+	if err := utils.ValidateWalletAddress(r.BidStateAddress); err != nil {
 		return fmt.Errorf("invalid bidStateAddress: %w", err)
 	}
 

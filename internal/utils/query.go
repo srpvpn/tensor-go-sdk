@@ -74,6 +74,8 @@ func BuildQueryParams(req interface{}) (url.Values, error) {
 }
 
 // ValidateWalletAddress validates a Solana wallet address
+// This is the centralized validation function used across the entire SDK
+// to ensure consistent wallet address validation
 func ValidateWalletAddress(wallet string) error {
 	if wallet == "" {
 		return &errors.ValidationError{

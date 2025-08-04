@@ -3,8 +3,9 @@ package user
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"strings"
+
+	"github.com/srpvpn/tensor-go-sdk/internal/utils"
 )
 
 // ListingsRequest represents the request parameters for getting user listings
@@ -118,24 +119,8 @@ func (r *PortfolioRequest) Validate() error {
 		return fmt.Errorf("wallet address is required")
 	}
 
-	if err := validateSolanaAddress(r.Wallet); err != nil {
+	if err := utils.ValidateWalletAddress(r.Wallet); err != nil {
 		return fmt.Errorf("invalid wallet address: %w", err)
-	}
-
-	return nil
-}
-
-// validateSolanaAddress validates that the provided string is a valid Solana address
-func validateSolanaAddress(address string) error {
-	// Solana addresses are base58 encoded and typically 32-44 characters long
-	if len(address) < 32 || len(address) > 44 {
-		return fmt.Errorf("address length must be between 32 and 44 characters")
-	}
-
-	// Check for valid base58 characters (no 0, O, I, l)
-	validBase58 := regexp.MustCompile(`^[1-9A-HJ-NP-Za-km-z]+$`)
-	if !validBase58.MatchString(address) {
-		return fmt.Errorf("address contains invalid characters")
 	}
 
 	return nil
@@ -173,7 +158,7 @@ func (r *ListingsRequest) Validate() error {
 	}
 
 	for _, wallet := range r.Wallets {
-		if err := validateSolanaAddress(wallet); err != nil {
+		if err := utils.ValidateWalletAddress(wallet); err != nil {
 			return fmt.Errorf("invalid wallet address %s: %w", wallet, err)
 		}
 	}
@@ -211,7 +196,7 @@ func (r *NFTBidsRequest) Validate() error {
 		return fmt.Errorf("owner wallet address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner wallet address: %w", err)
 	}
 
@@ -221,7 +206,7 @@ func (r *NFTBidsRequest) Validate() error {
 
 	// Validate bid addresses if provided
 	for _, bidAddr := range r.BidAddresses {
-		if err := validateSolanaAddress(bidAddr); err != nil {
+		if err := utils.ValidateWalletAddress(bidAddr); err != nil {
 			return fmt.Errorf("invalid bid address %s: %w", bidAddr, err)
 		}
 	}
@@ -235,7 +220,7 @@ func (r *CollectionBidsRequest) Validate() error {
 		return fmt.Errorf("owner wallet address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner wallet address: %w", err)
 	}
 
@@ -245,7 +230,7 @@ func (r *CollectionBidsRequest) Validate() error {
 
 	// Validate bid addresses if provided
 	for _, bidAddr := range r.BidAddresses {
-		if err := validateSolanaAddress(bidAddr); err != nil {
+		if err := utils.ValidateWalletAddress(bidAddr); err != nil {
 			return fmt.Errorf("invalid bid address %s: %w", bidAddr, err)
 		}
 	}
@@ -259,7 +244,7 @@ func (r *TraitBidsRequest) Validate() error {
 		return fmt.Errorf("owner wallet address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner wallet address: %w", err)
 	}
 
@@ -269,7 +254,7 @@ func (r *TraitBidsRequest) Validate() error {
 
 	// Validate bid addresses if provided
 	for _, bidAddr := range r.BidAddresses {
-		if err := validateSolanaAddress(bidAddr); err != nil {
+		if err := utils.ValidateWalletAddress(bidAddr); err != nil {
 			return fmt.Errorf("invalid bid address %s: %w", bidAddr, err)
 		}
 	}
@@ -282,7 +267,7 @@ func (r *TSwapsPoolsRequest) Validate() error {
 		return fmt.Errorf("owner wallet address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner wallet address: %w", err)
 	}
 
@@ -292,7 +277,7 @@ func (r *TSwapsPoolsRequest) Validate() error {
 
 	// Validate pool addresses if provided
 	for _, poolAddr := range r.PoolAddresses {
-		if err := validateSolanaAddress(poolAddr); err != nil {
+		if err := utils.ValidateWalletAddress(poolAddr); err != nil {
 			return fmt.Errorf("invalid pool address %s: %w", poolAddr, err)
 		}
 	}
@@ -305,7 +290,7 @@ func (r *TAmmPoolsRequest) Validate() error {
 		return fmt.Errorf("owner wallet address is required")
 	}
 
-	if err := validateSolanaAddress(r.Owner); err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner wallet address: %w", err)
 	}
 
@@ -315,7 +300,7 @@ func (r *TAmmPoolsRequest) Validate() error {
 
 	// Validate pool addresses if provided
 	for _, poolAddr := range r.PoolAddresses {
-		if err := validateSolanaAddress(poolAddr); err != nil {
+		if err := utils.ValidateWalletAddress(poolAddr); err != nil {
 			return fmt.Errorf("invalid pool address %s: %w", poolAddr, err)
 		}
 	}
@@ -329,7 +314,7 @@ func (r *TransactionsRequest) Validate() error {
 	}
 
 	for _, wallet := range r.Wallets {
-		if err := validateSolanaAddress(wallet); err != nil {
+		if err := utils.ValidateWalletAddress(wallet); err != nil {
 			return fmt.Errorf("invalid wallet address %s: %w", wallet, err)
 		}
 	}
@@ -377,11 +362,10 @@ func (r *EscrowAccountsRequest) Validate() error {
 		return fmt.Errorf("owner wallet address is required")
 	}
 
-	err := validateSolanaAddress(r.Owner)
-	if err != nil {
+	if err := utils.ValidateWalletAddress(r.Owner); err != nil {
 		return fmt.Errorf("invalid owner wallet address: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -392,7 +376,7 @@ func (r *InventoryForCollectionRequest) Validate() error {
 	}
 
 	for _, wallet := range r.Wallets {
-		if err := validateSolanaAddress(wallet); err != nil {
+		if err := utils.ValidateWalletAddress(wallet); err != nil {
 			return fmt.Errorf("invalid wallet address %s: %w", wallet, err)
 		}
 	}
