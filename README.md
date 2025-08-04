@@ -4,13 +4,12 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.19+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue?style=for-the-badge)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-pkg.go.dev-007d9c?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/srpvpn/tensor-go-sdk)
+
 
 **A powerful, type-safe Go SDK for the [Tensor Protocol](https://docs.tensor.trade/) - The leading NFT marketplace on Solana**
 
 [Installation](#-installation) •
 [Quick Start](#-quick-start) •
-[Documentation](#-documentation) •
 [Examples](#-examples) •
 [Contributing](#-contributing)
 
