@@ -273,7 +273,7 @@ withdrawNFTResp, statusCode, err := client.TSwap.DepositWithdrawNFT(ctx, &tswap.
 ```go
 // Deposit SOL to TSwap pool
 depositSOLResp, statusCode, err := client.TSwap.DepositWithdrawSOL(ctx, &tswap.DepositWithdrawSOLRequest{
-    Action:                "deposit", // deposit or withdraw (lowercase for SOL)
+    Action:                "DEPOSIT", // DEPOSIT or WITHDRAW (case insensitive, normalized to uppercase)
     PoolAddress:           "pool-address",
     Lamports:              1000000.0, // 1 SOL in lamports
     Blockhash:             "recent-blockhash",
@@ -283,7 +283,7 @@ depositSOLResp, statusCode, err := client.TSwap.DepositWithdrawSOL(ctx, &tswap.D
 
 // Withdraw SOL from TSwap pool
 withdrawSOLResp, statusCode, err := client.TSwap.DepositWithdrawSOL(ctx, &tswap.DepositWithdrawSOLRequest{
-    Action:      "withdraw",
+    Action:      "WITHDRAW",
     PoolAddress: "pool-address",
     Lamports:    500000.0, // 0.5 SOL in lamports
     Blockhash:   "recent-blockhash",
@@ -416,7 +416,6 @@ cancelTx, _, err := client.Marketplace.CancelBid(ctx, &marketplace.CancelBidRequ
 
 | API Category | Status | Priority | Description |
 |-------------|--------|----------|-------------|
-
 | **Shared Escrow API** | 📋 Planned | High | Escrow account management |
 | **TAmm API** | 📋 Planned | Medium | Advanced AMM features |
 | **Data API - NFTs** | 📋 Planned | Medium | NFT metadata and analytics |
