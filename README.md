@@ -45,6 +45,7 @@ import (
     "time"
 
     "github.com/srpvpn/tensor-go-sdk/api/marketplace"
+    "github.com/srpvpn/tensor-go-sdk/api/tswap"
     "github.com/srpvpn/tensor-go-sdk/api/user"
     "github.com/srpvpn/tensor-go-sdk/client"
 )
@@ -82,6 +83,17 @@ func main() {
     }
     
     fmt.Printf("Generated %d transactions for NFT purchase\n", len(buyTx.Txs))
+
+    // Close a TSwap pool
+    closeResp, statusCode, err := tensorClient.TSwap.CloseTSwapPool(ctx, &tswap.CloseTSwapPoolRequest{
+        PoolAddress: "pool-address",
+        Blockhash:   "recent-blockhash",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("Pool close transaction status: %d, transactions: %d\n", statusCode, len(closeResp.Txs))
 }
 ```
 
@@ -194,6 +206,87 @@ inventory, _, err := client.User.GetInventoryForCollection(ctx, &user.InventoryF
     Wallets: []string{"wallet-address"},
     CollId:  &[]string{"collection-id"}[0],
     Limit:   &[]int32{100}[0],
+})
+```
+</details>
+
+### 🔄 TSwap API
+
+<details>
+<summary><b>Pool Management</b></summary>
+
+```go
+// Close TSwap pool
+closeResp, statusCode, err := client.TSwap.CloseTSwapPool(ctx, &tswap.CloseTSwapPoolRequest{
+    PoolAddress:           "pool-address",
+    Blockhash:             "recent-blockhash",
+    Compute:               &[]int32{200000}[0],
+    PriorityMicroLamports: &[]int32{1000}[0],
+})
+
+// Edit TSwap pool
+editResp, statusCode, err := client.TSwap.EditTSwapPool(ctx, &tswap.EditTSwapPoolRequest{
+    PoolAddress:           "pool-address",
+    PoolType:              "TOKEN", // TOKEN, NFT, or TRADE
+    CurveType:             "linear", // linear or exponential
+    StartingPrice:         1.5,
+    Delta:                 0.1,
+    Blockhash:             "recent-blockhash",
+    MmKeepFeesSeparate:    &[]bool{true}[0],
+    MmFeeBps:              &[]float64{250.0}[0], // 2.5%
+    MaxTakerSellCount:     &[]int32{10}[0],
+    UseSharedEscrow:       &[]bool{false}[0],
+    Compute:               &[]int32{200000}[0],
+    PriorityMicroLamports: &[]int32{1000}[0],
+})
+```
+</details>
+
+<details>
+<summary><b>NFT Deposit/Withdraw</b></summary>
+
+```go
+// Deposit NFT to TSwap pool
+depositNFTResp, statusCode, err := client.TSwap.DepositWithdrawNFT(ctx, &tswap.DepositWithdrawNFTRequest{
+    Action:                "DEPOSIT", // DEPOSIT or WITHDRAW
+    PoolAddress:           "pool-address",
+    Mint:                  "nft-mint-address",
+    Blockhash:             "recent-blockhash",
+    NftSource:             &[]string{"source-address"}[0],
+    Compute:               &[]int32{200000}[0],
+    PriorityMicroLamports: &[]int32{1000}[0],
+})
+
+// Withdraw NFT from TSwap pool
+withdrawNFTResp, statusCode, err := client.TSwap.DepositWithdrawNFT(ctx, &tswap.DepositWithdrawNFTRequest{
+    Action:      "WITHDRAW",
+    PoolAddress: "pool-address",
+    Mint:        "nft-mint-address",
+    Blockhash:   "recent-blockhash",
+})
+```
+</details>
+
+<details>
+<summary><b>SOL Deposit/Withdraw</b></summary>
+
+```go
+// Deposit SOL to TSwap pool
+depositSOLResp, statusCode, err := client.TSwap.DepositWithdrawSOL(ctx, &tswap.DepositWithdrawSOLRequest{
+    Action:                "deposit", // deposit or withdraw (lowercase for SOL)
+    PoolAddress:           "pool-address",
+    Lamports:              1000000.0, // 1 SOL in lamports
+    Blockhash:             "recent-blockhash",
+    Compute:               &[]int32{200000}[0],
+    PriorityMicroLamports: &[]int32{1000}[0],
+})
+
+// Withdraw SOL from TSwap pool
+withdrawSOLResp, statusCode, err := client.TSwap.DepositWithdrawSOL(ctx, &tswap.DepositWithdrawSOLRequest{
+    Action:      "withdraw",
+    PoolAddress: "pool-address",
+    Lamports:    500000.0, // 0.5 SOL in lamports
+    Blockhash:   "recent-blockhash",
 })
 ```
 </details>
@@ -317,12 +410,13 @@ cancelTx, _, err := client.Marketplace.CancelBid(ctx, &marketplace.CancelBidRequ
 |-------------|--------|-----------|
 | **User API** | ✅ Complete | Portfolio, Listings, Bids, Transactions, Pools, Escrow, Inventory |
 | **Marketplace API** | ✅ Complete | Buy, Sell, List, Delist, Edit, Bid, Cancel |
+| **TSwap API** | ✅ Complete | Close Pool, Edit Pool, Deposit/Withdraw NFT, Deposit/Withdraw SOL |
 
 ### 🚧 Roadmap
 
 | API Category | Status | Priority | Description |
 |-------------|--------|----------|-------------|
-| **TSwap API** | 🔄 In Progress | High | AMM pool operations and swaps |
+
 | **Shared Escrow API** | 📋 Planned | High | Escrow account management |
 | **TAmm API** | 📋 Planned | Medium | Advanced AMM features |
 | **Data API - NFTs** | 📋 Planned | Medium | NFT metadata and analytics |
