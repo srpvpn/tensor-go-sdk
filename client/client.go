@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/srpvpn/tensor-go-sdk/api/marketplace"
+	"github.com/srpvpn/tensor-go-sdk/api/tswap"
 	"github.com/srpvpn/tensor-go-sdk/api/user"
 	"github.com/srpvpn/tensor-go-sdk/internal/transport"
 )
@@ -13,6 +14,7 @@ type Client struct {
 	transport   transport.Transport
 	User        user.UserAPI
 	Marketplace marketplace.MarketplaceAPI
+	TSwap       tswap.TSwapAPI
 }
 
 const (
@@ -51,12 +53,15 @@ func New(config *Config) *Client {
 	userAPI := user.New(transport)
 	// Create Marketplace API with transport
 	marketplaceAPI := marketplace.New(transport)
+	// Create TSwap API with transport
+	tswapAPI := tswap.New(transport)
 
 	// Return initialized client
 	return &Client{
 		transport:   transport,
 		User:        userAPI,
 		Marketplace: marketplaceAPI,
+		TSwap:       tswapAPI,
 	}
 }
 
