@@ -44,6 +44,7 @@ import (
     "log"
     "time"
 
+    "github.com/srpvpn/tensor-go-sdk/api/escrow"
     "github.com/srpvpn/tensor-go-sdk/api/marketplace"
     "github.com/srpvpn/tensor-go-sdk/api/rpc"
     "github.com/srpvpn/tensor-go-sdk/api/tswap"
@@ -103,6 +104,19 @@ func main() {
     }
     
     fmt.Printf("Current priority fees - Medium: %d micro-lamports\n", priorityFees.Medium)
+
+    // Deposit to escrow account
+    escrowDeposit, statusCode, err := tensorClient.Escrow.DepositWithdrawEscrow(ctx, &escrow.DepositWithdrawEscrowRequest{
+        Action:   "DEPOSIT",
+        Owner:    "owner-wallet-address",
+        Lamports: 1000000000.0, // 1 SOL
+        Blockhash: "recent-blockhash",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("Escrow deposit status: %d, response: %s\n", statusCode, escrowDeposit.Status)
 }
 ```
 
@@ -284,7 +298,7 @@ withdrawNFTResp, statusCode, err := client.TSwap.DepositWithdrawNFT(ctx, &tswap.
 depositSOLResp, statusCode, err := client.TSwap.DepositWithdrawSOL(ctx, &tswap.DepositWithdrawSOLRequest{
     Action:                "DEPOSIT", // DEPOSIT or WITHDRAW (case insensitive, normalized to uppercase)
     PoolAddress:           "pool-address",
-    Lamports:              1000000.0, // 1 SOL in lamports
+    Lamports:              1000000000.0, // 1 SOL in lamports
     Blockhash:             "recent-blockhash",
     Compute:               &[]int32{200000}[0],
     PriorityMicroLamports: &[]int32{1000}[0],
@@ -294,7 +308,7 @@ depositSOLResp, statusCode, err := client.TSwap.DepositWithdrawSOL(ctx, &tswap.D
 withdrawSOLResp, statusCode, err := client.TSwap.DepositWithdrawSOL(ctx, &tswap.DepositWithdrawSOLRequest{
     Action:      "WITHDRAW",
     PoolAddress: "pool-address",
-    Lamports:    500000.0, // 0.5 SOL in lamports
+    Lamports:    500000000.0, // 0.5 SOL in lamports
     Blockhash:   "recent-blockhash",
 })
 ```
@@ -442,6 +456,60 @@ buyTx, _, err := client.Marketplace.BuyNFT(ctx, &marketplace.BuyNFTRequest{
 ```
 </details>
 
+### 💰 Shared Escrow API
+
+<details>
+<summary><b>Escrow Management</b></summary>
+
+```go
+// Deposit SOL to escrow account
+depositResp, statusCode, err := client.Escrow.DepositWithdrawEscrow(ctx, &escrow.DepositWithdrawEscrowRequest{
+    Action:                "DEPOSIT", // DEPOSIT or WITHDRAW (case insensitive, normalized to uppercase)
+    Owner:                 "owner-wallet-address",
+    Lamports:              1000000000.0, // 1 SOL in lamports
+    Blockhash:             "recent-blockhash",
+    Compute:               &[]int32{200000}[0],
+    PriorityMicroLamports: &[]int32{1000}[0],
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Escrow deposit status: %d, response: %s\n", statusCode, depositResp.Status)
+
+// Withdraw SOL from escrow account
+withdrawResp, statusCode, err := client.Escrow.DepositWithdrawEscrow(ctx, &escrow.DepositWithdrawEscrowRequest{
+    Action:   "WITHDRAW",
+    Owner:    "owner-wallet-address",
+    Lamports: 500000000.0, // 0.5 SOL in lamports
+    Blockhash: "recent-blockhash",
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Escrow withdraw status: %d, response: %s\n", statusCode, withdrawResp.Status)
+
+// Use with priority fees for optimized transactions
+priorityFees, _, err := client.RPC.GetPriorityFees(ctx, &rpc.PriorityFeesRequest{})
+if err != nil {
+    log.Fatal(err)
+}
+
+compute := int32(200000)
+priorityMicroLamports := int32(priorityFees.Medium)
+
+optimizedDeposit, _, err := client.Escrow.DepositWithdrawEscrow(ctx, &escrow.DepositWithdrawEscrowRequest{
+    Action:                "DEPOSIT",
+    Owner:                 "owner-wallet-address",
+    Lamports:              2000000000.0, // 2 SOL
+    Blockhash:             "recent-blockhash",
+    Compute:               &compute,
+    PriorityMicroLamports: &priorityMicroLamports,
+})
+```
+</details>
+
 ## 🎯 Implementation Status
 
 ### ✅ Implemented APIs
@@ -452,12 +520,12 @@ buyTx, _, err := client.Marketplace.BuyNFT(ctx, &marketplace.BuyNFTRequest{
 | **Marketplace API** | ✅ Complete | Buy, Sell, List, Delist, Edit, Bid, Cancel |
 | **TSwap API** | ✅ Complete | Close Pool, Edit Pool, Deposit/Withdraw NFT, Deposit/Withdraw SOL |
 | **RPC API** | ✅ Complete | Priority Fees |
+| **Shared Escrow API** | ✅ Complete | Deposit/Withdraw Escrow |
 
 ### 🚧 Roadmap
 
 | API Category | Status | Priority | Description |
 |-------------|--------|----------|-------------|
-| **Shared Escrow API** | 📋 Planned | High | Escrow account management |
 | **TAmm API** | 📋 Planned | Medium | Advanced AMM features |
 | **Data API - NFTs** | 📋 Planned | Medium | NFT metadata and analytics |
 | **Data API - Orders** | 📋 Planned | Medium | Order book and market data |
@@ -491,6 +559,7 @@ Check out the [examples](./examples) directory for complete working examples:
 - [Basic Usage](./examples/basic_usage/main.go) - Simple portfolio and trading operations
 - [Advanced Trading](./examples/offline_demo/main.go) - Complex trading scenarios
 - [RPC Usage](./examples/rpc_usage/main.go) - Priority fees and RPC operations
+- [Escrow Usage](./examples/escrow_usage/main.go) - Shared escrow deposit/withdraw operations
 
 ## 🤝 Contributing
 
