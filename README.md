@@ -45,6 +45,7 @@ import (
     "time"
 
     "github.com/srpvpn/tensor-go-sdk/api/marketplace"
+    "github.com/srpvpn/tensor-go-sdk/api/rpc"
     "github.com/srpvpn/tensor-go-sdk/api/tswap"
     "github.com/srpvpn/tensor-go-sdk/api/user"
     "github.com/srpvpn/tensor-go-sdk/client"
@@ -94,6 +95,14 @@ func main() {
     }
     
     fmt.Printf("Pool close transaction status: %d, transactions: %d\n", statusCode, len(closeResp.Txs))
+
+    // Get priority fees for optimized transactions
+    priorityFees, _, err := tensorClient.RPC.GetPriorityFees(ctx, &rpc.PriorityFeesRequest{})
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("Current priority fees - Medium: %d micro-lamports\n", priorityFees.Medium)
 }
 ```
 
@@ -402,6 +411,37 @@ cancelTx, _, err := client.Marketplace.CancelBid(ctx, &marketplace.CancelBidRequ
 ```
 </details>
 
+### 🔧 RPC API
+
+<details>
+<summary><b>Priority Fees</b></summary>
+
+```go
+// Get market-based priority fees for transaction creation
+priorityFees, statusCode, err := client.RPC.GetPriorityFees(ctx, &rpc.PriorityFeesRequest{})
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Priority Fees - Min: %d, Low: %d, Medium: %d, High: %d, Very High: %d\n",
+    priorityFees.Min, priorityFees.Low, priorityFees.Medium, priorityFees.High, priorityFees.VeryHigh)
+
+// Use the fees in your transaction
+compute := int32(200000)
+priorityMicroLamports := int32(priorityFees.Medium) // Use medium priority
+
+buyTx, _, err := client.Marketplace.BuyNFT(ctx, &marketplace.BuyNFTRequest{
+    Buyer:                 "buyer-wallet",
+    Mint:                  "nft-mint",
+    Owner:                 "current-owner",
+    MaxPrice:              1.5,
+    Blockhash:             "recent-blockhash",
+    Compute:               &compute,
+    PriorityMicroLamports: &priorityMicroLamports,
+})
+```
+</details>
+
 ## 🎯 Implementation Status
 
 ### ✅ Implemented APIs
@@ -411,6 +451,7 @@ cancelTx, _, err := client.Marketplace.CancelBid(ctx, &marketplace.CancelBidRequ
 | **User API** | ✅ Complete | Portfolio, Listings, Bids, Transactions, Pools, Escrow, Inventory |
 | **Marketplace API** | ✅ Complete | Buy, Sell, List, Delist, Edit, Bid, Cancel |
 | **TSwap API** | ✅ Complete | Close Pool, Edit Pool, Deposit/Withdraw NFT, Deposit/Withdraw SOL |
+| **RPC API** | ✅ Complete | Priority Fees |
 
 ### 🚧 Roadmap
 
@@ -421,7 +462,6 @@ cancelTx, _, err := client.Marketplace.CancelBid(ctx, &marketplace.CancelBidRequ
 | **Data API - NFTs** | 📋 Planned | Medium | NFT metadata and analytics |
 | **Data API - Orders** | 📋 Planned | Medium | Order book and market data |
 | **Data API - Collections** | 📋 Planned | Medium | Collection statistics |
-| **Data API - RPC** | 📋 Planned | Low | Direct RPC calls |
 | **Refresh API** | 📋 Planned | Low | Data refresh endpoints |
 | **SDK API - Mint Proof** | 📋 Planned | Medium | Mint proof generation |
 | **SDK API - Trait Bids** | 📋 Planned | Medium | Advanced trait bidding |
@@ -450,6 +490,7 @@ Check out the [examples](./examples) directory for complete working examples:
 
 - [Basic Usage](./examples/basic_usage/main.go) - Simple portfolio and trading operations
 - [Advanced Trading](./examples/offline_demo/main.go) - Complex trading scenarios
+- [RPC Usage](./examples/rpc_usage/main.go) - Priority fees and RPC operations
 
 ## 🤝 Contributing
 
