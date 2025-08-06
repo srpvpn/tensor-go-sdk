@@ -3,6 +3,7 @@ package client
 import (
 	"time"
 
+	"github.com/srpvpn/tensor-go-sdk/api/escrow"
 	"github.com/srpvpn/tensor-go-sdk/api/marketplace"
 	"github.com/srpvpn/tensor-go-sdk/api/rpc"
 	"github.com/srpvpn/tensor-go-sdk/api/tswap"
@@ -17,6 +18,7 @@ type Client struct {
 	Marketplace marketplace.MarketplaceAPI
 	TSwap       tswap.TSwapAPI
 	RPC         rpc.RPCAPI
+	Escrow      escrow.EscrowAPI
 }
 
 const (
@@ -59,6 +61,8 @@ func New(config *Config) *Client {
 	tswapAPI := tswap.New(transport)
 	// Create RPC API with transport
 	rpcAPI := rpc.New(transport)
+	// Create Escrow API with transport
+	escrowAPI := escrow.New(transport)
 
 	// Return initialized client
 	return &Client{
@@ -67,6 +71,7 @@ func New(config *Config) *Client {
 		Marketplace: marketplaceAPI,
 		TSwap:       tswapAPI,
 		RPC:         rpcAPI,
+		Escrow:      escrowAPI,
 	}
 }
 

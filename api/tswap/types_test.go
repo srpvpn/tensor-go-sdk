@@ -641,7 +641,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "DEPOSIT",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    1000000.0, // 1 SOL
+				Lamports:    1000000000.0, // 1 SOL
 				Blockhash:   "11111111111111111111111111111114",
 			},
 			wantErr: false,
@@ -651,7 +651,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "deposit",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    1000000.0, // 1 SOL
+				Lamports:    1000000000.0, // 1 SOL
 				Blockhash:   "11111111111111111111111111111114",
 			},
 			wantErr: false,
@@ -661,7 +661,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "WITHDRAW",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    500000.0, // 0.5 SOL
+				Lamports:    500000000.0, // 0.5 SOL
 				Blockhash:   "11111111111111111111111111111114",
 			},
 			wantErr: false,
@@ -671,7 +671,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "WithDraw",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    500000.0, // 0.5 SOL
+				Lamports:    500000000.0, // 0.5 SOL
 				Blockhash:   "11111111111111111111111111111114",
 			},
 			wantErr: false,
@@ -681,7 +681,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    1000000.0,
+				Lamports:    1000000000.0,
 				Blockhash:   "11111111111111111111111111111114",
 			},
 			wantErr: true,
@@ -692,7 +692,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "INVALID",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    1000000.0,
+				Lamports:    1000000000.0,
 				Blockhash:   "11111111111111111111111111111114",
 			},
 			wantErr: true,
@@ -704,7 +704,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "deposit",
 				PoolAddress: "",
-				Lamports:    1000000.0,
+				Lamports:    1000000000.0,
 				Blockhash:   "11111111111111111111111111111114",
 			},
 			wantErr: true,
@@ -715,7 +715,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "deposit",
 				PoolAddress: "invalid",
-				Lamports:    1000000.0,
+				Lamports:    1000000000.0,
 				Blockhash:   "11111111111111111111111111111114",
 			},
 			wantErr: true,
@@ -737,7 +737,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "deposit",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    1000000.0,
+				Lamports:    1000000000.0,
 				Blockhash:   "",
 			},
 			wantErr: true,
@@ -748,7 +748,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "deposit",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    1000000.0,
+				Lamports:    1000000000.0,
 				Blockhash:   "11111111111111111111111111111114",
 				Compute:     int32Ptr(-1),
 			},
@@ -760,7 +760,7 @@ func TestDepositWithdrawSOLRequest_Validate(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:                "WITHDRAW",
 				PoolAddress:           "11111111111111111111111111111112",
-				Lamports:              2000000.0, // 2 SOL
+				Lamports:              2000000000.0, // 2 SOL
 				Blockhash:             "11111111111111111111111111111114",
 				Compute:               int32Ptr(200000),
 				PriorityMicroLamports: int32Ptr(1000),
@@ -866,22 +866,22 @@ func TestDepositWithdrawSOLRequest_JSON(t *testing.T) {
 			request: &DepositWithdrawSOLRequest{
 				Action:      "DEPOSIT",
 				PoolAddress: "11111111111111111111111111111112",
-				Lamports:    1000000.0,
+				Lamports:    1000000000.0,
 				Blockhash:   "11111111111111111111111111111114",
 			},
-			expected: `{"action":"DEPOSIT","poolAddress":"11111111111111111111111111111112","lamports":1000000,"blockhash":"11111111111111111111111111111114"}`,
+			expected: `{"action":"DEPOSIT","poolAddress":"11111111111111111111111111111112","lamports":1000000000,"blockhash":"11111111111111111111111111111114"}`,
 		},
 		{
 			name: "full request",
 			request: &DepositWithdrawSOLRequest{
 				Action:                "WITHDRAW",
 				PoolAddress:           "11111111111111111111111111111112",
-				Lamports:              2000000.0,
+				Lamports:              2000000000.0,
 				Blockhash:             "11111111111111111111111111111114",
 				Compute:               int32Ptr(200000),
 				PriorityMicroLamports: int32Ptr(1000),
 			},
-			expected: `{"action":"WITHDRAW","poolAddress":"11111111111111111111111111111112","lamports":2000000,"blockhash":"11111111111111111111111111111114","compute":200000,"priorityMicroLamports":1000}`,
+			expected: `{"action":"WITHDRAW","poolAddress":"11111111111111111111111111111112","lamports":2000000000,"blockhash":"11111111111111111111111111111114","compute":200000,"priorityMicroLamports":1000}`,
 		},
 	}
 
