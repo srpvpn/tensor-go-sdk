@@ -46,6 +46,7 @@ import (
 
     "github.com/srpvpn/tensor-go-sdk/api/escrow"
     "github.com/srpvpn/tensor-go-sdk/api/marketplace"
+    "github.com/srpvpn/tensor-go-sdk/api/nfts"
     "github.com/srpvpn/tensor-go-sdk/api/rpc"
     "github.com/srpvpn/tensor-go-sdk/api/tswap"
     "github.com/srpvpn/tensor-go-sdk/api/user"
@@ -117,6 +118,16 @@ func main() {
     }
     
     fmt.Printf("Escrow deposit status: %d, response: %s\n", statusCode, escrowDeposit.Status)
+
+    // Get NFT information
+    nftInfo, statusCode, err := tensorClient.NFTs.GetNFTsInfo(ctx, &nfts.NFTsInfoRequest{
+        Mints: []string{"nft-mint-address-1", "nft-mint-address-2"},
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("NFT info status: %d, data length: %d bytes\n", statusCode, len(nftInfo))
 }
 ```
 
@@ -510,6 +521,89 @@ optimizedDeposit, _, err := client.Escrow.DepositWithdrawEscrow(ctx, &escrow.Dep
 ```
 </details>
 
+### 🖼️ NFTs API
+
+<details>
+<summary><b>NFT Information</b></summary>
+
+```go
+// Get NFT info by mint addresses
+nftInfoBytes, statusCode, err := client.NFTs.GetNFTsInfo(ctx, &nfts.NFTsInfoRequest{
+    Mints: []string{
+        "nft-mint-address-1",
+        "nft-mint-address-2",
+        "nft-mint-address-3",
+    },
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("NFT info response (status: %d): %s\n", statusCode, string(nftInfoBytes))
+
+// Single NFT info
+singleNFTBytes, statusCode, err := client.NFTs.GetNFTsInfo(ctx, &nfts.NFTsInfoRequest{
+    Mints: []string{"single-nft-mint-address"},
+})
+```
+</details>
+
+<details>
+<summary><b>NFTs by Collection</b></summary>
+
+```go
+// Get NFTs by collection with basic filters
+collectionNFTsBytes, statusCode, err := client.NFTs.GetNFTsByCollection(ctx, &nfts.NFTsByCollectionRequest{
+    CollId: "collection-id",
+    SortBy: "PriceAsc", // PriceAsc, PriceDesc, RarityAsc, RarityDesc, etc.
+    Limit:  50,
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Collection NFTs response (status: %d): %s\n", statusCode, string(collectionNFTsBytes))
+
+// Advanced filtering with all options
+advancedFilterBytes, statusCode, err := client.NFTs.GetNFTsByCollection(ctx, &nfts.NFTsByCollectionRequest{
+    CollId:            "collection-id",
+    SortBy:            "PriceDesc",
+    Limit:             100,
+    OnlyListings:      &[]bool{true}[0],                    // Only show listed NFTs
+    MinPrice:          &[]float64{0.5}[0],                  // Minimum price filter
+    MaxPrice:          &[]float64{10.0}[0],                 // Maximum price filter
+    TraitCountMin:     &[]int32{3}[0],                      // Minimum trait count
+    TraitCountMax:     &[]int32{8}[0],                      // Maximum trait count
+    Name:              &[]string{"Cool NFT"}[0],            // Name filter
+    ExcludeOwners:     []string{"owner-to-exclude"},        // Exclude specific owners
+    IncludeOwners:     []string{"owner-to-include"},        // Include only specific owners
+    IncludeCurrencies: []string{"SOL", "USDC"},             // Currency filters
+    Traits:            []string{`{"Background": ["Blue", "Red"]}`}, // Trait filters
+    RaritySystem:      &[]string{"tensor"}[0],              // Rarity system
+    RarityMin:         &[]float64{1.0}[0],                  // Minimum rarity
+    RarityMax:         &[]float64{100.0}[0],                // Maximum rarity
+    OnlyInscriptions:  &[]bool{false}[0],                   // Solana Inscriptions filter
+    ImmutableStatus:   &[]string{"mutable"}[0],             // Immutability filter
+})
+
+// Pagination with cursor
+paginatedBytes, statusCode, err := client.NFTs.GetNFTsByCollection(ctx, &nfts.NFTsByCollectionRequest{
+    CollId: "collection-id",
+    SortBy: "PriceAsc",
+    Limit:  50,
+    Cursor: &[]string{"cursor-from-previous-response"}[0],
+})
+
+// Filter by specific mints within collection
+specificMintsBytes, statusCode, err := client.NFTs.GetNFTsByCollection(ctx, &nfts.NFTsByCollectionRequest{
+    CollId: "collection-id",
+    SortBy: "PriceAsc",
+    Limit:  50,
+    Mints:  []string{"mint1", "mint2", "mint3"}, // Filter for specific mints
+})
+```
+</details>
+
 ## 🎯 Implementation Status
 
 ### ✅ Implemented APIs
@@ -521,13 +615,13 @@ optimizedDeposit, _, err := client.Escrow.DepositWithdrawEscrow(ctx, &escrow.Dep
 | **TSwap API** | ✅ Complete | Close Pool, Edit Pool, Deposit/Withdraw NFT, Deposit/Withdraw SOL |
 | **RPC API** | ✅ Complete | Priority Fees |
 | **Shared Escrow API** | ✅ Complete | Deposit/Withdraw Escrow |
+| **NFTs API** | ✅ Complete | NFT Info, NFTs by Collection |
 
 ### 🚧 Roadmap
 
 | API Category | Status | Priority | Description |
 |-------------|--------|----------|-------------|
 | **TAmm API** | 📋 Planned | Medium | Advanced AMM features |
-| **Data API - NFTs** | 📋 Planned | Medium | NFT metadata and analytics |
 | **Data API - Orders** | 📋 Planned | Medium | Order book and market data |
 | **Data API - Collections** | 📋 Planned | Medium | Collection statistics |
 | **Refresh API** | 📋 Planned | Low | Data refresh endpoints |
@@ -558,8 +652,6 @@ Check out the [examples](./examples) directory for complete working examples:
 
 - [Basic Usage](./examples/basic_usage/main.go) - Simple portfolio and trading operations
 - [Advanced Trading](./examples/offline_demo/main.go) - Complex trading scenarios
-- [RPC Usage](./examples/rpc_usage/main.go) - Priority fees and RPC operations
-- [Escrow Usage](./examples/escrow_usage/main.go) - Shared escrow deposit/withdraw operations
 
 ## 🤝 Contributing
 
