@@ -44,6 +44,7 @@ import (
     "log"
     "time"
 
+    "github.com/srpvpn/tensor-go-sdk/api/collections"
     "github.com/srpvpn/tensor-go-sdk/api/escrow"
     "github.com/srpvpn/tensor-go-sdk/api/marketplace"
     "github.com/srpvpn/tensor-go-sdk/api/nfts"
@@ -128,6 +129,17 @@ func main() {
     }
     
     fmt.Printf("NFT info status: %d, data length: %d bytes\n", statusCode, len(nftInfo))
+
+    // Get verified collections
+    collections, statusCode, err := tensorClient.Collections.GetVerifiedCollections(ctx, &collections.GetVerifiedCollectionsRequest{
+        SortBy: "statsV2.volume1h:desc",
+        Limit:  10,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("Found %d verified collections\n", len(collections))
 }
 ```
 
@@ -601,6 +613,68 @@ specificMintsBytes, statusCode, err := client.NFTs.GetNFTsByCollection(ctx, &nft
     Limit:  50,
     Mints:  []string{"mint1", "mint2", "mint3"}, // Filter for specific mints
 })
+```
+</details>
+
+### 🗂️ Collections API
+
+<details>
+<summary><b>Get Verified Collections</b></summary>
+
+```go
+// Get top collections by volume
+collectionsBytes, statusCode, err := client.Collections.GetVerifiedCollections(ctx, &collections.GetVerifiedCollectionsRequest{
+    SortBy: "statsV2.volume1h:desc", // Sort by 1h volume descending
+    Limit:  10,                       // Get top 10 collections
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Collections response (status: %d): %s\n", statusCode, string(collectionsBytes))
+
+// Get specific collections by slug
+specificCollections, statusCode, err := client.Collections.GetVerifiedCollections(ctx, &collections.GetVerifiedCollectionsRequest{
+    SortBy:       "statsV2.volume24h:desc",
+    Limit:        5,
+    SlugDisplays: []string{"portalsuniverse", "degods", "madlads"},
+})
+
+// Get collections by collection IDs
+collByIds, statusCode, err := client.Collections.GetVerifiedCollections(ctx, &collections.GetVerifiedCollectionsRequest{
+    SortBy:  "statsV2.floor1h:asc",
+    Limit:   20,
+    CollIds: []string{"ec2fc59c-8240-4166-ad76-478f57958188"},
+})
+
+// Get collections with pagination
+page1, statusCode, err := client.Collections.GetVerifiedCollections(ctx, &collections.GetVerifiedCollectionsRequest{
+    SortBy: "statsV2.marketCap:desc",
+    Limit:  50,
+    Page:   func() *int32 { v := int32(1); return &v }(),
+})
+
+page2, statusCode, err := client.Collections.GetVerifiedCollections(ctx, &collections.GetVerifiedCollectionsRequest{
+    SortBy: "statsV2.marketCap:desc",
+    Limit:  50,
+    Page:   func() *int32 { v := int32(2); return &v }(),
+})
+
+// Filter by verified on-chain collection (max 10 vocs/fvcs)
+onChainFiltered, statusCode, err := client.Collections.GetVerifiedCollections(ctx, &collections.GetVerifiedCollectionsRequest{
+    SortBy: "statsV2.volume7d:desc",
+    Limit:  25,
+    Vocs:   []string{"voc-address-1", "voc-address-2"},
+})
+
+// Filter by first verified creators (max 10 vocs/fvcs)
+creatorFiltered, statusCode, err := client.Collections.GetVerifiedCollections(ctx, &collections.GetVerifiedCollectionsRequest{
+    SortBy: "statsV2.sales24h:desc",
+    Limit:  25,
+    Fvcs:   []string{"creator-address-1", "creator-address-2"},
+})
+
+
 ```
 </details>
 

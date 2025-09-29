@@ -3,6 +3,7 @@ package client
 import (
 	"time"
 
+	"github.com/srpvpn/tensor-go-sdk/api/collections"
 	"github.com/srpvpn/tensor-go-sdk/api/escrow"
 	"github.com/srpvpn/tensor-go-sdk/api/marketplace"
 	"github.com/srpvpn/tensor-go-sdk/api/nfts"
@@ -21,6 +22,7 @@ type Client struct {
 	RPC         rpc.RPCAPI
 	Escrow      escrow.EscrowAPI
 	NFTs        nfts.NFTsAPI
+	Collections collections.CollectionsAPI
 }
 
 const (
@@ -67,6 +69,8 @@ func New(config *Config) *Client {
 	escrowAPI := escrow.New(transport)
 	// Create NFTs API with transport
 	nftsAPI := nfts.New(transport)
+	// Create Collections API with transport
+	collectionsAPI := collections.New(transport)
 
 	// Return initialized client
 	return &Client{
@@ -77,6 +81,7 @@ func New(config *Config) *Client {
 		RPC:         rpcAPI,
 		Escrow:      escrowAPI,
 		NFTs:        nftsAPI,
+		Collections: collectionsAPI,
 	}
 }
 
